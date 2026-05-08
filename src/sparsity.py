@@ -113,6 +113,15 @@ def sparsity_summary(model, masks: dict[str, torch.Tensor] | None = None) -> dic
     }
 
 
+def layer_active_counts(masks: dict[str, torch.Tensor]) -> dict[str, int]:
+    """Return the number of active weights in each sparse layer mask."""
+
+    return {
+        name: int(mask.detach().count_nonzero().item())
+        for name, mask in masks.items()
+    }
+
+
 def format_layer_sparsity(layer_sparsity: dict[str, float]) -> str:
     """Format layer-wise sparsity for CSV logs."""
 

@@ -95,7 +95,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--method",
         type=str,
-        choices=["fedavg", "sparse_fedavg"],
+        choices=["fedavg", "sparse_fedavg", "feddst"],
         default="fedavg",
         help="Training method to run.",
     )
@@ -103,14 +103,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--sparsity",
         type=float,
         default=0.0,
-        help="Target global unstructured sparsity for sparse_fedavg.",
+        help="Target global unstructured sparsity for sparse methods.",
     )
     parser.add_argument(
         "--sparsity-init",
         type=str,
         choices=["random", "magnitude"],
         default="random",
-        help="Mask initialization rule for sparse_fedavg.",
+        help="Mask initialization rule for sparse methods.",
+    )
+    parser.add_argument(
+        "--mask-update-interval",
+        type=int,
+        default=1,
+        help="FedDST mask update interval in communication rounds.",
+    )
+    parser.add_argument(
+        "--prune-fraction",
+        type=float,
+        default=0.1,
+        help="Fraction of active weights to prune per layer on FedDST updates.",
     )
     return parser
 
@@ -146,7 +158,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     from .data import DataConfig, load_mnist
-    from .federated import FederatedConfig, run_fedavg, run_sparse_fedavg
+    from .dst import DSTConfig
+    from .federated import FederatedConfig, run_fedavg, run_feddst, run_sparse_fedavg
     from .models import get_model
     from .sparsity import SparsityConfig
     from .utils import save_csv
@@ -164,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
     model = get_model("small_cnn", "mnist")
     learning_rate = args.lr
     if learning_rate is None:
-        learning_rate = 0.5 if args.method == "sparse_fedavg" else 0.05
+        learning_rate = 0.5 if args.method in {"sparse_fedavg", "feddst"} else 0.05
 
     fed_config = FederatedConfig(
         num_clients=args.num_clients,
@@ -174,12 +187,27 @@ def main(argv: list[str] | None = None) -> int:
         seed=args.seed,
         device=args.device,
     )
-    if args.method == "sparse_fedavg":
+    if args.method in {"sparse_fedavg", "feddst"}:
         sparsity_config = SparsityConfig(
             target_sparsity=args.sparsity,
             init_method=args.sparsity_init,
             seed=args.seed,
         )
+
+    if args.method == "feddst":
+        dst_config = DSTConfig(
+            mask_update_interval=args.mask_update_interval,
+            prune_fraction=args.prune_fraction,
+        )
+        logs = run_feddst(
+            model,
+            client_loaders,
+            test_loader,
+            fed_config,
+            sparsity_config,
+            dst_config,
+        )
+    elif args.method == "sparse_fedavg":
         logs = run_sparse_fedavg(
             model,
             client_loaders,

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
+from .dst import DSTConfig, update_sparse_topology
 from .evaluate import evaluate_model
 from .sparsity import (
     SparsityConfig,
@@ -35,6 +36,7 @@ def train_client(
     config: FederatedConfig,
     device,
     masks: dict[str, torch.Tensor] | None = None,
+    collect_grad_scores: bool = False,
 ):
     """Train one client from the current global model."""
 
@@ -47,6 +49,7 @@ def train_client(
 
     total_loss = 0.0
     total_samples = 0
+    grad_scores = _empty_gradient_scores(masks) if collect_grad_scores else None
 
     for _ in range(config.local_epochs):
         for images, labels in train_loader:
@@ -57,6 +60,8 @@ def train_client(
             logits = client_model(images)
             loss = criterion(logits, labels)
             loss.backward()
+            if grad_scores is not None:
+                _accumulate_gradient_scores(client_model, grad_scores, labels.size(0))
             optimizer.step()
             apply_masks(client_model, masks or {})
 
@@ -71,11 +76,14 @@ def train_client(
         name: tensor.detach().cpu().clone()
         for name, tensor in client_model.state_dict().items()
     }
-    return {
+    result = {
         "state_dict": state_dict,
         "num_samples": len(train_loader.dataset),
         "train_loss": total_loss / total_samples,
     }
+    if grad_scores is not None:
+        result["grad_scores"] = grad_scores
+    return result
 
 
 def aggregate_weights(client_updates: list[dict]) -> dict[str, torch.Tensor]:
@@ -110,6 +118,7 @@ def run_federated_round(
     config: FederatedConfig,
     device,
     masks: dict[str, torch.Tensor] | None = None,
+    collect_grad_scores: bool = False,
 ):
     """Run one simulated communication round.
 
@@ -124,17 +133,27 @@ def run_federated_round(
     """
 
     client_updates = [
-        train_client(global_model, client_loader, config, device, masks=masks)
+        train_client(
+            global_model,
+            client_loader,
+            config,
+            device,
+            masks=masks,
+            collect_grad_scores=collect_grad_scores,
+        )
         for client_loader in client_loaders
     ]
     global_model.load_state_dict(aggregate_weights(client_updates))
     apply_masks(global_model, masks or {})
 
     total_samples = sum(update["num_samples"] for update in client_updates)
-    return sum(
+    avg_train_loss = sum(
         update["train_loss"] * update["num_samples"] / total_samples
         for update in client_updates
     )
+    if collect_grad_scores:
+        return avg_train_loss, aggregate_gradient_scores(client_updates, masks or {})
+    return avg_train_loss
 
 
 def run_fedavg(global_model, client_loaders, test_loader, config: FederatedConfig):
@@ -237,6 +256,92 @@ def run_sparse_fedavg(
     return logs
 
 
+def run_feddst(
+    global_model,
+    client_loaders,
+    test_loader,
+    config: FederatedConfig,
+    sparsity_config: SparsityConfig,
+    dst_config: DSTConfig,
+):
+    """Run a simplified FedDST/RigL-style dynamic sparse baseline."""
+
+    _validate_config(config, client_loaders)
+    seed_everything(config.seed)
+
+    device = _resolve_device(config.device)
+    global_model.to(device)
+
+    masks = create_masks(global_model, sparsity_config)
+    apply_masks(global_model, masks)
+
+    initial_summary = sparsity_summary(global_model, masks)
+    print(
+        "Initial sparsity | "
+        f"total={initial_summary['total_sparsity']:.4f} | "
+        f"active={initial_summary['active_params']}/{initial_summary['total_params']}"
+    )
+    print(
+        "Layer sparsity | "
+        f"{format_layer_sparsity(initial_summary['layer_sparsity'])}"
+    )
+
+    logs = []
+    for round_id in range(1, config.rounds + 1):
+        should_update_mask = round_id % dst_config.mask_update_interval == 0
+        round_result = run_federated_round(
+            global_model=global_model,
+            client_loaders=client_loaders,
+            config=config,
+            device=device,
+            masks=masks,
+            collect_grad_scores=should_update_mask,
+        )
+
+        update_stats = _empty_dst_stats(global_model, masks)
+        if should_update_mask:
+            avg_train_loss, grad_scores = round_result
+            masks, update_stats = update_sparse_topology(
+                global_model,
+                masks,
+                grad_scores,
+                dst_config,
+            )
+        else:
+            avg_train_loss = round_result
+
+        metrics = evaluate_model(global_model, test_loader, device=device)
+        summary = sparsity_summary(global_model, masks)
+        row = {
+            "round": round_id,
+            "test_accuracy": metrics["accuracy"],
+            "test_loss": metrics["loss"],
+            "avg_train_loss": avg_train_loss,
+            "pruned_weights": update_stats["pruned"],
+            "regrown_weights": update_stats["regrown"],
+            "mask_changes": update_stats["mask_changes"],
+            "total_sparsity": summary["total_sparsity"],
+            "active_params": summary["active_params"],
+            "total_params": summary["total_params"],
+            "layer_sparsity": format_layer_sparsity(summary["layer_sparsity"]),
+        }
+        row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
+        logs.append(row)
+
+        print(
+            f"Round {round_id:03d} | "
+            f"train_loss={avg_train_loss:.4f} | "
+            f"test_loss={metrics['loss']:.4f} | "
+            f"test_acc={metrics['accuracy']:.4f} | "
+            f"sparsity={summary['total_sparsity']:.4f} | "
+            f"pruned={update_stats['pruned']} | "
+            f"regrown={update_stats['regrown']} | "
+            f"mask_changes={update_stats['mask_changes']}"
+        )
+
+    return logs
+
+
 def _resolve_device(device_name: str):
     """Resolve 'auto' to CUDA when available, otherwise CPU."""
 
@@ -268,4 +373,63 @@ def _layer_sparsity_columns(layer_sparsity: dict[str, float]) -> dict[str, float
     return {
         f"sparsity_{name.replace('.', '_')}": value
         for name, value in sorted(layer_sparsity.items())
+    }
+
+
+def _empty_gradient_scores(
+    masks: dict[str, torch.Tensor] | None,
+) -> dict[str, torch.Tensor]:
+    """Create zero-filled gradient score buffers matching sparse masks."""
+
+    return {
+        name: torch.zeros_like(mask, dtype=torch.float32, device="cpu")
+        for name, mask in (masks or {}).items()
+    }
+
+
+def _accumulate_gradient_scores(model, grad_scores, batch_size: int) -> None:
+    """Accumulate absolute gradients for sparse mask regrowth."""
+
+    for name, param in model.named_parameters():
+        if name in grad_scores and param.grad is not None:
+            grad_scores[name] += param.grad.detach().abs().cpu() * batch_size
+
+
+def aggregate_gradient_scores(
+    client_updates: list[dict],
+    masks: dict[str, torch.Tensor],
+) -> dict[str, torch.Tensor]:
+    """Average client gradient scores by client sample count."""
+
+    if not masks:
+        return {}
+
+    total_samples = sum(update["num_samples"] for update in client_updates)
+    if total_samples <= 0:
+        raise ValueError("Total client sample count must be positive.")
+
+    aggregated = _empty_gradient_scores(masks)
+    for update in client_updates:
+        grad_scores = update.get("grad_scores")
+        if grad_scores is None:
+            continue
+        weight = update["num_samples"] / total_samples
+        for name in aggregated:
+            aggregated[name] += grad_scores[name] * weight
+    return aggregated
+
+
+def _empty_dst_stats(global_model, masks: dict[str, torch.Tensor]) -> dict:
+    """Return zero topology-change stats for rounds without mask updates."""
+
+    summary = sparsity_summary(global_model, masks)
+    return {
+        "pruned": 0,
+        "regrown": 0,
+        "mask_changes": 0,
+        "layer_stats": {},
+        "total_sparsity": summary["total_sparsity"],
+        "layer_sparsity": summary["layer_sparsity"],
+        "active_params": summary["active_params"],
+        "total_params": summary["total_params"],
     }
