@@ -83,14 +83,34 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--lr",
         type=float,
-        default=0.01,
-        help="Client learning rate for SGD.",
+        default=None,
+        help="Client learning rate for SGD. Defaults depend on the method.",
     )
     parser.add_argument(
         "--device",
         type=str,
         default="auto",
         help="Training device: auto, cpu, or cuda.",
+    )
+    parser.add_argument(
+        "--method",
+        type=str,
+        choices=["fedavg", "sparse_fedavg"],
+        default="fedavg",
+        help="Training method to run.",
+    )
+    parser.add_argument(
+        "--sparsity",
+        type=float,
+        default=0.0,
+        help="Target global unstructured sparsity for sparse_fedavg.",
+    )
+    parser.add_argument(
+        "--sparsity-init",
+        type=str,
+        choices=["random", "magnitude"],
+        default="random",
+        help="Mask initialization rule for sparse_fedavg.",
     )
     return parser
 
@@ -126,8 +146,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     from .data import DataConfig, load_mnist
-    from .federated import FederatedConfig, run_fedavg
+    from .federated import FederatedConfig, run_fedavg, run_sparse_fedavg
     from .models import get_model
+    from .sparsity import SparsityConfig
     from .utils import save_csv
 
     data_config = DataConfig(
@@ -141,21 +162,44 @@ def main(argv: list[str] | None = None) -> int:
     client_loaders, test_loader, _ = load_mnist(data_config)
 
     model = get_model("small_cnn", "mnist")
+    learning_rate = args.lr
+    if learning_rate is None:
+        learning_rate = 0.5 if args.method == "sparse_fedavg" else 0.05
+
     fed_config = FederatedConfig(
         num_clients=args.num_clients,
         rounds=args.rounds,
         local_epochs=args.local_epochs,
-        lr=args.lr,
+        lr=learning_rate,
         seed=args.seed,
         device=args.device,
     )
-    logs = run_fedavg(model, client_loaders, test_loader, fed_config)
+    if args.method == "sparse_fedavg":
+        sparsity_config = SparsityConfig(
+            target_sparsity=args.sparsity,
+            init_method=args.sparsity_init,
+            seed=args.seed,
+        )
+        logs = run_sparse_fedavg(
+            model,
+            client_loaders,
+            test_loader,
+            fed_config,
+            sparsity_config,
+        )
+    else:
+        logs = run_fedavg(model, client_loaders, test_loader, fed_config)
 
     alpha_text = str(args.alpha).replace(".", "p")
+    sparsity_text = str(args.sparsity).replace(".", "p")
+    log_name = (
+        f"{args.method}_mnist_clients{args.num_clients}_alpha{alpha_text}"
+        f"_sparsity{sparsity_text}_seed{args.seed}.csv"
+    )
     log_path = (
         args.output_dir
         / "logs"
-        / f"fedavg_mnist_clients{args.num_clients}_alpha{alpha_text}_seed{args.seed}.csv"
+        / log_name
     )
     save_csv(logs, log_path)
     print(f"Saved logs to {log_path}")

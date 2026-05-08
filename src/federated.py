@@ -7,6 +7,13 @@ import torch
 from torch import nn
 
 from .evaluate import evaluate_model
+from .sparsity import (
+    SparsityConfig,
+    apply_masks,
+    create_masks,
+    format_layer_sparsity,
+    sparsity_summary,
+)
 from .utils import seed_everything
 
 
@@ -22,10 +29,17 @@ class FederatedConfig:
     device: str = "auto"
 
 
-def train_client(global_model, train_loader, config: FederatedConfig, device):
+def train_client(
+    global_model,
+    train_loader,
+    config: FederatedConfig,
+    device,
+    masks: dict[str, torch.Tensor] | None = None,
+):
     """Train one client from the current global model."""
 
     client_model = copy.deepcopy(global_model).to(device)
+    apply_masks(client_model, masks or {})
     client_model.train()
 
     criterion = nn.CrossEntropyLoss()
@@ -44,6 +58,7 @@ def train_client(global_model, train_loader, config: FederatedConfig, device):
             loss = criterion(logits, labels)
             loss.backward()
             optimizer.step()
+            apply_masks(client_model, masks or {})
 
             batch_size = labels.size(0)
             total_loss += loss.item() * batch_size
@@ -89,7 +104,13 @@ def aggregate_weights(client_updates: list[dict]) -> dict[str, torch.Tensor]:
     return aggregated
 
 
-def run_federated_round(global_model, client_loaders, config: FederatedConfig, device):
+def run_federated_round(
+    global_model,
+    client_loaders,
+    config: FederatedConfig,
+    device,
+    masks: dict[str, torch.Tensor] | None = None,
+):
     """Run one simulated communication round.
 
     Args:
@@ -103,10 +124,11 @@ def run_federated_round(global_model, client_loaders, config: FederatedConfig, d
     """
 
     client_updates = [
-        train_client(global_model, client_loader, config, device)
+        train_client(global_model, client_loader, config, device, masks=masks)
         for client_loader in client_loaders
     ]
     global_model.load_state_dict(aggregate_weights(client_updates))
+    apply_masks(global_model, masks or {})
 
     total_samples = sum(update["num_samples"] for update in client_updates)
     return sum(
@@ -151,6 +173,70 @@ def run_fedavg(global_model, client_loaders, test_loader, config: FederatedConfi
     return logs
 
 
+def run_sparse_fedavg(
+    global_model,
+    client_loaders,
+    test_loader,
+    config: FederatedConfig,
+    sparsity_config: SparsityConfig,
+):
+    """Run FedAvg with a fixed unstructured sparsity mask."""
+
+    _validate_config(config, client_loaders)
+    seed_everything(config.seed)
+
+    device = _resolve_device(config.device)
+    global_model.to(device)
+
+    masks = create_masks(global_model, sparsity_config)
+    apply_masks(global_model, masks)
+
+    initial_summary = sparsity_summary(global_model, masks)
+    print(
+        "Initial sparsity | "
+        f"total={initial_summary['total_sparsity']:.4f} | "
+        f"active={initial_summary['active_params']}/{initial_summary['total_params']}"
+    )
+    print(
+        "Layer sparsity | "
+        f"{format_layer_sparsity(initial_summary['layer_sparsity'])}"
+    )
+
+    logs = []
+    for round_id in range(1, config.rounds + 1):
+        avg_train_loss = run_federated_round(
+            global_model=global_model,
+            client_loaders=client_loaders,
+            config=config,
+            device=device,
+            masks=masks,
+        )
+        metrics = evaluate_model(global_model, test_loader, device=device)
+        summary = sparsity_summary(global_model, masks)
+        row = {
+            "round": round_id,
+            "test_accuracy": metrics["accuracy"],
+            "test_loss": metrics["loss"],
+            "avg_train_loss": avg_train_loss,
+            "total_sparsity": summary["total_sparsity"],
+            "active_params": summary["active_params"],
+            "total_params": summary["total_params"],
+            "layer_sparsity": format_layer_sparsity(summary["layer_sparsity"]),
+        }
+        row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
+        logs.append(row)
+
+        print(
+            f"Round {round_id:03d} | "
+            f"train_loss={avg_train_loss:.4f} | "
+            f"test_loss={metrics['loss']:.4f} | "
+            f"test_acc={metrics['accuracy']:.4f} | "
+            f"sparsity={summary['total_sparsity']:.4f}"
+        )
+
+    return logs
+
+
 def _resolve_device(device_name: str):
     """Resolve 'auto' to CUDA when available, otherwise CPU."""
 
@@ -174,3 +260,12 @@ def _validate_config(config: FederatedConfig, client_loaders) -> None:
         raise ValueError(
             f"Expected {config.num_clients} client loaders, got {len(client_loaders)}."
         )
+
+
+def _layer_sparsity_columns(layer_sparsity: dict[str, float]) -> dict[str, float]:
+    """Return CSV-friendly per-layer sparsity columns."""
+
+    return {
+        f"sparsity_{name.replace('.', '_')}": value
+        for name, value in sorted(layer_sparsity.items())
+    }
