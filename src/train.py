@@ -68,6 +68,30 @@ def build_parser() -> argparse.ArgumentParser:
         default=200,
         help="Balanced reference subset size for CKA.",
     )
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        default=3,
+        help="Number of FedAvg communication rounds.",
+    )
+    parser.add_argument(
+        "--local-epochs",
+        type=int,
+        default=1,
+        help="Number of local epochs per client each round.",
+    )
+    parser.add_argument(
+        "--lr",
+        type=float,
+        default=0.01,
+        help="Client learning rate for SGD.",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="auto",
+        help="Training device: auto, cpu, or cuda.",
+    )
     return parser
 
 
@@ -101,7 +125,40 @@ def main(argv: list[str] | None = None) -> int:
         print("Dry run complete. Training is not implemented yet.")
         return 0
 
-    print("Training scaffold is ready. Full experiment logic is not implemented yet.")
+    from .data import DataConfig, load_mnist
+    from .federated import FederatedConfig, run_fedavg
+    from .models import get_model
+    from .utils import save_csv
+
+    data_config = DataConfig(
+        data_dir=args.data_dir,
+        num_clients=args.num_clients,
+        alpha=args.alpha,
+        batch_size=args.batch_size,
+        seed=args.seed,
+        reference_size=args.reference_size,
+    )
+    client_loaders, test_loader, _ = load_mnist(data_config)
+
+    model = get_model("small_cnn", "mnist")
+    fed_config = FederatedConfig(
+        num_clients=args.num_clients,
+        rounds=args.rounds,
+        local_epochs=args.local_epochs,
+        lr=args.lr,
+        seed=args.seed,
+        device=args.device,
+    )
+    logs = run_fedavg(model, client_loaders, test_loader, fed_config)
+
+    alpha_text = str(args.alpha).replace(".", "p")
+    log_path = (
+        args.output_dir
+        / "logs"
+        / f"fedavg_mnist_clients{args.num_clients}_alpha{alpha_text}_seed{args.seed}.csv"
+    )
+    save_csv(logs, log_path)
+    print(f"Saved logs to {log_path}")
     return 0
 
 

@@ -1,5 +1,6 @@
 """Shared utility functions for experiment code."""
 
+import csv
 import random
 from pathlib import Path
 
@@ -8,6 +9,20 @@ def ensure_dir(path: Path) -> Path:
     """Create a directory if needed and return it."""
 
     path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def save_csv(rows: list[dict], path: Path) -> Path:
+    """Save a list of metric dictionaries as a CSV file."""
+
+    if not rows:
+        raise ValueError("Cannot save an empty CSV.")
+
+    ensure_dir(path.parent)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
     return path
 
 
