@@ -132,6 +132,7 @@ def run_federated_round(
     masks: dict[str, torch.Tensor] | None = None,
     collect_grad_scores: bool = False,
     reference_loader=None,
+    cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
 ):
     """Run one simulated communication round.
 
@@ -163,6 +164,7 @@ def run_federated_round(
             [update["model"] for update in client_updates],
             reference_loader,
             device=device,
+            layers=cka_layers,
         )
 
     global_model.load_state_dict(aggregate_weights(client_updates))
@@ -190,6 +192,7 @@ def run_fedavg(
     config: FederatedConfig,
     reference_loader=None,
     cka_log_path=None,
+    cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
 ):
     """Run standard FedAvg and return one metrics dictionary per round."""
 
@@ -208,6 +211,7 @@ def run_fedavg(
             config=config,
             device=device,
             reference_loader=reference_loader,
+            cka_layers=cka_layers,
         )
         if reference_loader is not None:
             avg_train_loss, cka_result = round_result
@@ -245,6 +249,7 @@ def run_sparse_fedavg(
     sparsity_config: SparsityConfig,
     reference_loader=None,
     cka_log_path=None,
+    cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
 ):
     """Run FedAvg with a fixed unstructured sparsity mask."""
 
@@ -278,6 +283,7 @@ def run_sparse_fedavg(
             device=device,
             masks=masks,
             reference_loader=reference_loader,
+            cka_layers=cka_layers,
         )
         if reference_loader is not None:
             avg_train_loss, cka_result = round_result
@@ -323,6 +329,7 @@ def run_feddst(
     dst_config: DSTConfig,
     reference_loader=None,
     cka_log_path=None,
+    cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
 ):
     """Run a simplified FedDST/RigL-style dynamic sparse baseline."""
 
@@ -358,6 +365,7 @@ def run_feddst(
             masks=masks,
             collect_grad_scores=should_update_mask,
             reference_loader=reference_loader,
+            cka_layers=cka_layers,
         )
 
         update_stats = _empty_dst_stats(global_model, masks)
@@ -428,12 +436,20 @@ def run_cka_feddst(
     dst_config: DSTConfig,
     cka_interval: int = 1,
     cka_target_strength: float = 0.5,
+    cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
+    cka_min_sparsity: float = 0.0,
+    cka_max_sparsity: float = 0.99,
     cka_log_path=None,
 ):
     """Run CKA-guided FedDST with adaptive layer-wise sparsity targets."""
 
     _validate_config(config, client_loaders)
-    _validate_cka_config(cka_interval, cka_target_strength)
+    _validate_cka_config(
+        cka_interval,
+        cka_target_strength,
+        cka_min_sparsity,
+        cka_max_sparsity,
+    )
     seed_everything(config.seed)
 
     device = _resolve_device(config.device)
@@ -457,7 +473,7 @@ def run_cka_feddst(
     cka_rows = []
     latest_cka_scores = {}
     layer_targets = {}
-    cka_layer_names = DEFAULT_CKA_LAYERS
+    cka_layer_names = cka_layers
     sparse_layer_names = tuple(masks)
 
     for round_id in range(1, config.rounds + 1):
@@ -471,6 +487,7 @@ def run_cka_feddst(
             masks=masks,
             collect_grad_scores=should_update_mask,
             reference_loader=reference_loader if should_compute_cka else None,
+            cka_layers=cka_layers,
         )
 
         cka_result = None
@@ -492,12 +509,17 @@ def run_cka_feddst(
                 cka_scores=latest_cka_scores,
                 base_sparsity=sparsity_config.target_sparsity,
                 strength=cka_target_strength,
+                min_sparsity=cka_min_sparsity,
+                max_sparsity=cka_max_sparsity,
             )
             _extend_cka_rows(cka_rows, cka_result, round_id)
 
         update_stats = _empty_dst_stats(global_model, masks)
         if should_update_mask:
-            guided_dst_config = replace(dst_config, layer_sparsities=layer_targets or None)
+            guided_dst_config = replace(
+                dst_config,
+                layer_sparsities=layer_targets or None,
+            )
             masks, update_stats = update_sparse_topology(
                 global_model,
                 masks,
@@ -573,13 +595,22 @@ def _validate_config(config: FederatedConfig, client_loaders) -> None:
         )
 
 
-def _validate_cka_config(cka_interval: int, cka_target_strength: float) -> None:
+def _validate_cka_config(
+    cka_interval: int,
+    cka_target_strength: float,
+    cka_min_sparsity: float = 0.0,
+    cka_max_sparsity: float = 0.99,
+) -> None:
     """Validate CKA-guided sparse training settings."""
 
     if cka_interval <= 0:
         raise ValueError("cka_interval must be positive.")
     if cka_target_strength < 0.0:
         raise ValueError("cka_target_strength must be non-negative.")
+    if not 0.0 <= cka_min_sparsity <= cka_max_sparsity < 1.0:
+        raise ValueError(
+            "Expected 0.0 <= cka_min_sparsity <= cka_max_sparsity < 1.0."
+        )
 
 
 def _layer_sparsity_columns(layer_sparsity: dict[str, float]) -> dict[str, float]:

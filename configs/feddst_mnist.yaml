@@ -1,0 +1,6 @@
+method: feddst
+sparsity: 0.8
+sparsity_init: random
+mask_update_interval: 2
+prune_fraction: 0.2
+regrowth_method: gradient

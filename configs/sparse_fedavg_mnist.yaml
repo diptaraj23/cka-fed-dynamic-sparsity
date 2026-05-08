@@ -1,0 +1,3 @@
+method: sparse_fedavg
+sparsity: 0.8
+sparsity_init: random

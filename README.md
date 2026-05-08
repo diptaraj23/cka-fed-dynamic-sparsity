@@ -89,28 +89,38 @@ These targets are passed into the FedDST pruning and regrowth step.
 
 ## How to Run Experiments
 
+Experiments are configured with YAML files. Shared settings live in
+`configs/global.yaml`; method-specific files only contain values that differ
+from the shared setup.
+
 Run a single method:
 
 ```bash
-python -m src.train --method fedavg --num-clients 5 --rounds 20 --local-epochs 1 --alpha 0.3 --seed 42
+python -m src.train --config configs/fedavg_mnist.yaml
 ```
 
 Run sparse FedAvg:
 
 ```bash
-python -m src.train --method sparse_fedavg --num-clients 5 --rounds 20 --local-epochs 1 --alpha 0.3 --sparsity 0.8 --seed 42
+python -m src.train --config configs/sparse_fedavg_mnist.yaml
 ```
 
 Run FedDST:
 
 ```bash
-python -m src.train --method feddst --num-clients 5 --rounds 20 --local-epochs 1 --alpha 0.3 --sparsity 0.8 --seed 42
+python -m src.train --config configs/feddst_mnist.yaml
 ```
 
 Run CKA-guided FedDST:
 
 ```bash
-python -m src.train --method cka_feddst --num-clients 5 --rounds 20 --local-epochs 1 --alpha 0.3 --sparsity 0.8 --seed 42 --cka-interval 5
+python -m src.train --config configs/cka_feddst_mnist.yaml
+```
+
+Command-line arguments override YAML values only when explicitly provided:
+
+```bash
+python -m src.train --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.9
 ```
 
 Run all four MNIST methods sequentially:
@@ -132,6 +142,9 @@ Training logs are saved to:
 ```text
 results/logs/
 ```
+
+Each run also saves the final merged configuration next to the CSV log for
+reproducibility.
 
 Logs include, depending on the method:
 
@@ -206,6 +219,7 @@ src/
   sparsity.py            Mask creation and sparsity utilities
   dst.py                 Dynamic sparse pruning/regrowth
   cka.py                 Linear CKA computation
+  config.py              YAML loading and configuration merging
   train.py               Training CLI
   evaluate.py            Evaluation utilities
   plotting.py            Plotting utilities

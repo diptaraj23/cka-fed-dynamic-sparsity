@@ -1,6 +1,7 @@
 """Fixed unstructured sparsity utilities."""
 
 from dataclasses import dataclass
+import math
 
 import torch
 
@@ -127,6 +128,8 @@ def cka_scores_to_layer_sparsities(
     cka_scores: dict[str, float],
     base_sparsity: float,
     strength: float = 0.5,
+    min_sparsity: float = 0.0,
+    max_sparsity: float = 0.99,
 ) -> dict[str, float]:
     """Convert CKA scores into layer-wise sparsity targets.
 
@@ -140,11 +143,25 @@ def cka_scores_to_layer_sparsities(
         raise ValueError("base_sparsity must be in [0.0, 1.0).")
     if strength < 0.0:
         raise ValueError("strength must be non-negative.")
+    if not 0.0 <= min_sparsity <= max_sparsity < 1.0:
+        raise ValueError("Expected 0.0 <= min_sparsity <= max_sparsity < 1.0.")
 
     names = list(masks)
     param_counts = {name: masks[name].numel() for name in names}
     total_params = sum(param_counts.values())
     total_active = round(total_params * (1.0 - base_sparsity))
+    min_active = {
+        name: math.ceil(param_counts[name] * (1.0 - max_sparsity))
+        for name in names
+    }
+    max_active = {
+        name: math.floor(param_counts[name] * (1.0 - min_sparsity))
+        for name in names
+    }
+    total_active = max(
+        sum(min_active.values()),
+        min(total_active, sum(max_active.values())),
+    )
 
     scores = {
         name: float(cka_scores.get(_activation_name(name), 0.5))
@@ -161,7 +178,13 @@ def cka_scores_to_layer_sparsities(
         name: total_active * raw_weights[name] / raw_total
         for name in names
     }
-    active_counts = _rounded_active_budget(active_float, param_counts, total_active)
+    active_counts = _rounded_active_budget(
+        active_float,
+        param_counts,
+        total_active,
+        min_active=min_active,
+        max_active=max_active,
+    )
 
     return {
         name: 1.0 - (active_counts[name] / param_counts[name])
@@ -231,18 +254,25 @@ def _rounded_active_budget(
     active_float: dict[str, float],
     param_counts: dict[str, int],
     total_active: int,
+    min_active: dict[str, int] | None = None,
+    max_active: dict[str, int] | None = None,
 ) -> dict[str, int]:
     """Round active counts while preserving the requested global budget."""
 
+    if min_active is None:
+        min_active = {name: 0 for name in active_float}
+    if max_active is None:
+        max_active = param_counts
+
     active_counts = {
-        name: max(0, min(param_counts[name], int(active_float[name])))
+        name: max(min_active[name], min(max_active[name], int(active_float[name])))
         for name in active_float
     }
     current_total = sum(active_counts.values())
 
     while current_total < total_active:
         candidates = [
-            name for name in active_counts if active_counts[name] < param_counts[name]
+            name for name in active_counts if active_counts[name] < max_active[name]
         ]
         if not candidates:
             break
@@ -251,7 +281,9 @@ def _rounded_active_budget(
         current_total += 1
 
     while current_total > total_active:
-        candidates = [name for name in active_counts if active_counts[name] > 0]
+        candidates = [
+            name for name in active_counts if active_counts[name] > min_active[name]
+        ]
         if not candidates:
             break
         name = min(candidates, key=lambda item: active_float[item] - active_counts[item])

@@ -17,6 +17,7 @@ class DSTConfig:
 
     mask_update_interval: int = 1
     prune_fraction: float = 0.1
+    regrowth_method: str = "gradient"
     layer_sparsities: dict[str, float] | None = None
 
 
@@ -215,3 +216,5 @@ def _validate_config(config: DSTConfig) -> None:
         raise ValueError("mask_update_interval must be positive.")
     if not 0.0 <= config.prune_fraction <= 1.0:
         raise ValueError("prune_fraction must be in [0.0, 1.0].")
+    if config.regrowth_method != "gradient":
+        raise ValueError("Only gradient regrowth is implemented.")
