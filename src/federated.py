@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
+from .cka import cka_to_rows, compute_client_cka, save_cka_csv
 from .dst import DSTConfig, update_sparse_topology
 from .evaluate import evaluate_model
 from .sparsity import (
@@ -37,6 +38,7 @@ def train_client(
     device,
     masks: dict[str, torch.Tensor] | None = None,
     collect_grad_scores: bool = False,
+    return_model: bool = False,
 ):
     """Train one client from the current global model."""
 
@@ -83,6 +85,8 @@ def train_client(
     }
     if grad_scores is not None:
         result["grad_scores"] = grad_scores
+    if return_model:
+        result["model"] = client_model.cpu()
     return result
 
 
@@ -119,6 +123,7 @@ def run_federated_round(
     device,
     masks: dict[str, torch.Tensor] | None = None,
     collect_grad_scores: bool = False,
+    reference_loader=None,
 ):
     """Run one simulated communication round.
 
@@ -140,9 +145,18 @@ def run_federated_round(
             device,
             masks=masks,
             collect_grad_scores=collect_grad_scores,
+            return_model=reference_loader is not None,
         )
         for client_loader in client_loaders
     ]
+    cka_result = None
+    if reference_loader is not None:
+        cka_result = compute_client_cka(
+            [update["model"] for update in client_updates],
+            reference_loader,
+            device=device,
+        )
+
     global_model.load_state_dict(aggregate_weights(client_updates))
     apply_masks(global_model, masks or {})
 
@@ -152,11 +166,23 @@ def run_federated_round(
         for update in client_updates
     )
     if collect_grad_scores:
-        return avg_train_loss, aggregate_gradient_scores(client_updates, masks or {})
+        grad_scores = aggregate_gradient_scores(client_updates, masks or {})
+        if cka_result is not None:
+            return avg_train_loss, grad_scores, cka_result
+        return avg_train_loss, grad_scores
+    if cka_result is not None:
+        return avg_train_loss, cka_result
     return avg_train_loss
 
 
-def run_fedavg(global_model, client_loaders, test_loader, config: FederatedConfig):
+def run_fedavg(
+    global_model,
+    client_loaders,
+    test_loader,
+    config: FederatedConfig,
+    reference_loader=None,
+    cka_log_path=None,
+):
     """Run standard FedAvg and return one metrics dictionary per round."""
 
     _validate_config(config, client_loaders)
@@ -166,13 +192,21 @@ def run_fedavg(global_model, client_loaders, test_loader, config: FederatedConfi
     global_model.to(device)
 
     logs = []
+    cka_rows = []
     for round_id in range(1, config.rounds + 1):
-        avg_train_loss = run_federated_round(
+        round_result = run_federated_round(
             global_model=global_model,
             client_loaders=client_loaders,
             config=config,
             device=device,
+            reference_loader=reference_loader,
         )
+        if reference_loader is not None:
+            avg_train_loss, cka_result = round_result
+        else:
+            avg_train_loss = round_result
+            cka_result = None
+
         metrics = evaluate_model(global_model, test_loader, device=device)
         row = {
             "round": round_id,
@@ -180,7 +214,9 @@ def run_fedavg(global_model, client_loaders, test_loader, config: FederatedConfi
             "test_loss": metrics["loss"],
             "avg_train_loss": avg_train_loss,
         }
+        _add_cka_average_columns(row, cka_result)
         logs.append(row)
+        _extend_cka_rows(cka_rows, cka_result, round_id)
 
         print(
             f"Round {round_id:03d} | "
@@ -189,6 +225,7 @@ def run_fedavg(global_model, client_loaders, test_loader, config: FederatedConfi
             f"test_acc={metrics['accuracy']:.4f}"
         )
 
+    _save_cka_rows_if_requested(cka_rows, cka_log_path)
     return logs
 
 
@@ -198,6 +235,8 @@ def run_sparse_fedavg(
     test_loader,
     config: FederatedConfig,
     sparsity_config: SparsityConfig,
+    reference_loader=None,
+    cka_log_path=None,
 ):
     """Run FedAvg with a fixed unstructured sparsity mask."""
 
@@ -222,14 +261,22 @@ def run_sparse_fedavg(
     )
 
     logs = []
+    cka_rows = []
     for round_id in range(1, config.rounds + 1):
-        avg_train_loss = run_federated_round(
+        round_result = run_federated_round(
             global_model=global_model,
             client_loaders=client_loaders,
             config=config,
             device=device,
             masks=masks,
+            reference_loader=reference_loader,
         )
+        if reference_loader is not None:
+            avg_train_loss, cka_result = round_result
+        else:
+            avg_train_loss = round_result
+            cka_result = None
+
         metrics = evaluate_model(global_model, test_loader, device=device)
         summary = sparsity_summary(global_model, masks)
         row = {
@@ -243,7 +290,9 @@ def run_sparse_fedavg(
             "layer_sparsity": format_layer_sparsity(summary["layer_sparsity"]),
         }
         row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
+        _add_cka_average_columns(row, cka_result)
         logs.append(row)
+        _extend_cka_rows(cka_rows, cka_result, round_id)
 
         print(
             f"Round {round_id:03d} | "
@@ -253,6 +302,7 @@ def run_sparse_fedavg(
             f"sparsity={summary['total_sparsity']:.4f}"
         )
 
+    _save_cka_rows_if_requested(cka_rows, cka_log_path)
     return logs
 
 
@@ -263,6 +313,8 @@ def run_feddst(
     config: FederatedConfig,
     sparsity_config: SparsityConfig,
     dst_config: DSTConfig,
+    reference_loader=None,
+    cka_log_path=None,
 ):
     """Run a simplified FedDST/RigL-style dynamic sparse baseline."""
 
@@ -287,6 +339,7 @@ def run_feddst(
     )
 
     logs = []
+    cka_rows = []
     for round_id in range(1, config.rounds + 1):
         should_update_mask = round_id % dst_config.mask_update_interval == 0
         round_result = run_federated_round(
@@ -296,10 +349,20 @@ def run_feddst(
             device=device,
             masks=masks,
             collect_grad_scores=should_update_mask,
+            reference_loader=reference_loader,
         )
 
         update_stats = _empty_dst_stats(global_model, masks)
-        if should_update_mask:
+        cka_result = None
+        if should_update_mask and reference_loader is not None:
+            avg_train_loss, grad_scores, cka_result = round_result
+            masks, update_stats = update_sparse_topology(
+                global_model,
+                masks,
+                grad_scores,
+                dst_config,
+            )
+        elif should_update_mask:
             avg_train_loss, grad_scores = round_result
             masks, update_stats = update_sparse_topology(
                 global_model,
@@ -307,6 +370,8 @@ def run_feddst(
                 grad_scores,
                 dst_config,
             )
+        elif reference_loader is not None:
+            avg_train_loss, cka_result = round_result
         else:
             avg_train_loss = round_result
 
@@ -326,7 +391,9 @@ def run_feddst(
             "layer_sparsity": format_layer_sparsity(summary["layer_sparsity"]),
         }
         row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
+        _add_cka_average_columns(row, cka_result)
         logs.append(row)
+        _extend_cka_rows(cka_rows, cka_result, round_id)
 
         print(
             f"Round {round_id:03d} | "
@@ -339,6 +406,7 @@ def run_feddst(
             f"mask_changes={update_stats['mask_changes']}"
         )
 
+    _save_cka_rows_if_requested(cka_rows, cka_log_path)
     return logs
 
 
@@ -374,6 +442,33 @@ def _layer_sparsity_columns(layer_sparsity: dict[str, float]) -> dict[str, float
         f"sparsity_{name.replace('.', '_')}": value
         for name, value in sorted(layer_sparsity.items())
     }
+
+
+def _add_cka_average_columns(row: dict, cka_result: dict | None) -> None:
+    """Add average layer CKA values to a round log row."""
+
+    if cka_result is None:
+        return
+    for layer, value in cka_result["average_cka"].items():
+        row[f"cka_avg_{layer}"] = value
+
+
+def _extend_cka_rows(
+    rows: list[dict],
+    cka_result: dict | None,
+    round_id: int,
+) -> None:
+    """Append pairwise CKA matrix rows for a round."""
+
+    if cka_result is not None:
+        rows.extend(cka_to_rows(cka_result, round_id=round_id))
+
+
+def _save_cka_rows_if_requested(rows: list[dict], cka_log_path) -> None:
+    """Save pairwise CKA rows when a log path is provided."""
+
+    if cka_log_path is not None and rows:
+        save_cka_csv(rows, cka_log_path)
 
 
 def _empty_gradient_scores(

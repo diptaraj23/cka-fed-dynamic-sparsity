@@ -124,6 +124,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.1,
         help="Fraction of active weights to prune per layer on FedDST updates.",
     )
+    parser.add_argument(
+        "--log-cka",
+        action="store_true",
+        help="Compute and save pairwise client CKA after each round.",
+    )
     return parser
 
 
@@ -172,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
         seed=args.seed,
         reference_size=args.reference_size,
     )
-    client_loaders, test_loader, _ = load_mnist(data_config)
+    client_loaders, test_loader, reference_loader = load_mnist(data_config)
 
     model = get_model("small_cnn", "mnist")
     learning_rate = args.lr
@@ -194,6 +199,16 @@ def main(argv: list[str] | None = None) -> int:
             seed=args.seed,
         )
 
+    alpha_text = str(args.alpha).replace(".", "p")
+    sparsity_text = str(args.sparsity).replace(".", "p")
+    log_name = (
+        f"{args.method}_mnist_clients{args.num_clients}_alpha{alpha_text}"
+        f"_sparsity{sparsity_text}_seed{args.seed}.csv"
+    )
+    cka_log_path = None
+    if args.log_cka:
+        cka_log_path = args.output_dir / "logs" / log_name.replace(".csv", "_cka.csv")
+
     if args.method == "feddst":
         dst_config = DSTConfig(
             mask_update_interval=args.mask_update_interval,
@@ -206,6 +221,8 @@ def main(argv: list[str] | None = None) -> int:
             fed_config,
             sparsity_config,
             dst_config,
+            reference_loader=reference_loader if args.log_cka else None,
+            cka_log_path=cka_log_path,
         )
     elif args.method == "sparse_fedavg":
         logs = run_sparse_fedavg(
@@ -214,16 +231,19 @@ def main(argv: list[str] | None = None) -> int:
             test_loader,
             fed_config,
             sparsity_config,
+            reference_loader=reference_loader if args.log_cka else None,
+            cka_log_path=cka_log_path,
         )
     else:
-        logs = run_fedavg(model, client_loaders, test_loader, fed_config)
+        logs = run_fedavg(
+            model,
+            client_loaders,
+            test_loader,
+            fed_config,
+            reference_loader=reference_loader if args.log_cka else None,
+            cka_log_path=cka_log_path,
+        )
 
-    alpha_text = str(args.alpha).replace(".", "p")
-    sparsity_text = str(args.sparsity).replace(".", "p")
-    log_name = (
-        f"{args.method}_mnist_clients{args.num_clients}_alpha{alpha_text}"
-        f"_sparsity{sparsity_text}_seed{args.seed}.csv"
-    )
     log_path = (
         args.output_dir
         / "logs"
@@ -231,6 +251,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     save_csv(logs, log_path)
     print(f"Saved logs to {log_path}")
+    if cka_log_path is not None:
+        print(f"Saved CKA logs to {cka_log_path}")
     return 0
 
 
