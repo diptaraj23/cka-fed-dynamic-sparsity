@@ -134,7 +134,8 @@ def cka_scores_to_layer_sparsities(
     """Convert CKA scores into layer-wise sparsity targets.
 
     Layers with higher CKA receive more active weights, which means lower
-    sparsity. The global active-weight budget stays tied to ``base_sparsity``.
+    sparsity. Only layers with measured CKA scores receive adaptive targets;
+    other sparse layers keep their existing active-count budget in FedDST.
     """
 
     if not masks:
@@ -146,7 +147,13 @@ def cka_scores_to_layer_sparsities(
     if not 0.0 <= min_sparsity <= max_sparsity < 1.0:
         raise ValueError("Expected 0.0 <= min_sparsity <= max_sparsity < 1.0.")
 
-    names = list(masks)
+    names = [
+        name for name in masks
+        if _activation_name(name) in cka_scores
+    ]
+    if not names:
+        return {}
+
     param_counts = {name: masks[name].numel() for name in names}
     total_params = sum(param_counts.values())
     total_active = round(total_params * (1.0 - base_sparsity))

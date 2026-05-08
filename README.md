@@ -84,6 +84,7 @@ Layer-wise sparsity targets are then adapted:
 - high CKA layers receive lower sparsity
 - low CKA layers receive higher sparsity
 - the total active parameter budget remains approximately fixed at the base sparsity
+- classifier-only layers such as `fc2` are not assigned CKA-guided targets
 
 These targets are passed into the FedDST pruning and regrowth step.
 
