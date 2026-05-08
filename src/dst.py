@@ -9,7 +9,11 @@ from .sparsity import apply_masks, sparsity_summary
 
 @dataclass(frozen=True)
 class DSTConfig:
-    """Configuration for FedDST/RigL-style mask updates."""
+    """Configuration for FedDST/RigL-style mask updates.
+
+    ``layer_sparsities`` can be supplied by adaptive methods such as
+    CKA-guided FedDST to change the per-layer active-weight budget.
+    """
 
     mask_update_interval: int = 1
     prune_fraction: float = 0.1

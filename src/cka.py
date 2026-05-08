@@ -167,6 +167,15 @@ def average_upper_triangle(matrix: torch.Tensor) -> float:
     return float(value)
 
 
+def average_cka_scores(cka_result: dict) -> dict[str, float]:
+    """Return average upper-triangle CKA scores from a CKA result object."""
+
+    return {
+        layer: float(value)
+        for layer, value in cka_result["average_cka"].items()
+    }
+
+
 def cka_to_rows(cka_result: dict, round_id: int | None = None) -> list[dict]:
     """Convert CKA matrices to tidy CSV rows."""
 

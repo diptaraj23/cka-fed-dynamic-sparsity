@@ -122,12 +122,65 @@ def layer_active_counts(masks: dict[str, torch.Tensor]) -> dict[str, int]:
     }
 
 
+def cka_scores_to_layer_sparsities(
+    masks: dict[str, torch.Tensor],
+    cka_scores: dict[str, float],
+    base_sparsity: float,
+    strength: float = 0.5,
+) -> dict[str, float]:
+    """Convert CKA scores into layer-wise sparsity targets.
+
+    Layers with higher CKA receive more active weights, which means lower
+    sparsity. The global active-weight budget stays tied to ``base_sparsity``.
+    """
+
+    if not masks:
+        return {}
+    if not 0.0 <= base_sparsity < 1.0:
+        raise ValueError("base_sparsity must be in [0.0, 1.0).")
+    if strength < 0.0:
+        raise ValueError("strength must be non-negative.")
+
+    names = list(masks)
+    param_counts = {name: masks[name].numel() for name in names}
+    total_params = sum(param_counts.values())
+    total_active = round(total_params * (1.0 - base_sparsity))
+
+    scores = {
+        name: float(cka_scores.get(_activation_name(name), 0.5))
+        for name in names
+    }
+    mean_score = sum(scores.values()) / len(scores)
+    raw_weights = {}
+    for name in names:
+        score_shift = scores[name] - mean_score
+        raw_weights[name] = param_counts[name] * max(0.05, 1.0 + strength * score_shift)
+
+    raw_total = sum(raw_weights.values())
+    active_float = {
+        name: total_active * raw_weights[name] / raw_total
+        for name in names
+    }
+    active_counts = _rounded_active_budget(active_float, param_counts, total_active)
+
+    return {
+        name: 1.0 - (active_counts[name] / param_counts[name])
+        for name in names
+    }
+
+
 def format_layer_sparsity(layer_sparsity: dict[str, float]) -> str:
     """Format layer-wise sparsity for CSV logs."""
 
     return ";".join(
         f"{name}:{value:.6f}" for name, value in sorted(layer_sparsity.items())
     )
+
+
+def format_layer_values(values: dict[str, float]) -> str:
+    """Format layer-wise floating-point values for compact CSV logging."""
+
+    return ";".join(f"{name}:{value:.6f}" for name, value in sorted(values.items()))
 
 
 def maskable_parameters(model):
@@ -166,6 +219,46 @@ def _tensor_sparsity(tensor: torch.Tensor) -> float:
         return 0.0
     active = tensor.detach().count_nonzero().item()
     return 1.0 - (active / tensor.numel())
+
+
+def _activation_name(parameter_name: str) -> str:
+    """Map a parameter name such as 'conv1.weight' to activation name 'conv1'."""
+
+    return parameter_name.rsplit(".", maxsplit=1)[0]
+
+
+def _rounded_active_budget(
+    active_float: dict[str, float],
+    param_counts: dict[str, int],
+    total_active: int,
+) -> dict[str, int]:
+    """Round active counts while preserving the requested global budget."""
+
+    active_counts = {
+        name: max(0, min(param_counts[name], int(active_float[name])))
+        for name in active_float
+    }
+    current_total = sum(active_counts.values())
+
+    while current_total < total_active:
+        candidates = [
+            name for name in active_counts if active_counts[name] < param_counts[name]
+        ]
+        if not candidates:
+            break
+        name = max(candidates, key=lambda item: active_float[item] - active_counts[item])
+        active_counts[name] += 1
+        current_total += 1
+
+    while current_total > total_active:
+        candidates = [name for name in active_counts if active_counts[name] > 0]
+        if not candidates:
+            break
+        name = min(candidates, key=lambda item: active_float[item] - active_counts[item])
+        active_counts[name] -= 1
+        current_total -= 1
+
+    return active_counts
 
 
 def _validate_config(config: SparsityConfig) -> None:

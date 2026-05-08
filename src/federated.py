@@ -1,19 +1,27 @@
 """Standard FedAvg training for simulated federated learning."""
 
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import torch
 from torch import nn
 
-from .cka import cka_to_rows, compute_client_cka, save_cka_csv
+from .cka import (
+    DEFAULT_CKA_LAYERS,
+    average_cka_scores,
+    cka_to_rows,
+    compute_client_cka,
+    save_cka_csv,
+)
 from .dst import DSTConfig, update_sparse_topology
 from .evaluate import evaluate_model
 from .sparsity import (
     SparsityConfig,
     apply_masks,
+    cka_scores_to_layer_sparsities,
     create_masks,
     format_layer_sparsity,
+    format_layer_values,
     sparsity_summary,
 )
 from .utils import seed_everything
@@ -410,6 +418,136 @@ def run_feddst(
     return logs
 
 
+def run_cka_feddst(
+    global_model,
+    client_loaders,
+    test_loader,
+    reference_loader,
+    config: FederatedConfig,
+    sparsity_config: SparsityConfig,
+    dst_config: DSTConfig,
+    cka_interval: int = 1,
+    cka_target_strength: float = 0.5,
+    cka_log_path=None,
+):
+    """Run CKA-guided FedDST with adaptive layer-wise sparsity targets."""
+
+    _validate_config(config, client_loaders)
+    _validate_cka_config(cka_interval, cka_target_strength)
+    seed_everything(config.seed)
+
+    device = _resolve_device(config.device)
+    global_model.to(device)
+
+    masks = create_masks(global_model, sparsity_config)
+    apply_masks(global_model, masks)
+
+    initial_summary = sparsity_summary(global_model, masks)
+    print(
+        "Initial sparsity | "
+        f"total={initial_summary['total_sparsity']:.4f} | "
+        f"active={initial_summary['active_params']}/{initial_summary['total_params']}"
+    )
+    print(
+        "Layer sparsity | "
+        f"{format_layer_sparsity(initial_summary['layer_sparsity'])}"
+    )
+
+    logs = []
+    cka_rows = []
+    latest_cka_scores = {}
+    layer_targets = {}
+    cka_layer_names = DEFAULT_CKA_LAYERS
+    sparse_layer_names = tuple(masks)
+
+    for round_id in range(1, config.rounds + 1):
+        should_update_mask = round_id % dst_config.mask_update_interval == 0
+        should_compute_cka = round_id % cka_interval == 0
+        round_result = run_federated_round(
+            global_model=global_model,
+            client_loaders=client_loaders,
+            config=config,
+            device=device,
+            masks=masks,
+            collect_grad_scores=should_update_mask,
+            reference_loader=reference_loader if should_compute_cka else None,
+        )
+
+        cka_result = None
+        if should_update_mask and should_compute_cka:
+            avg_train_loss, grad_scores, cka_result = round_result
+        elif should_update_mask:
+            avg_train_loss, grad_scores = round_result
+        elif should_compute_cka:
+            avg_train_loss, cka_result = round_result
+            grad_scores = None
+        else:
+            avg_train_loss = round_result
+            grad_scores = None
+
+        if cka_result is not None:
+            latest_cka_scores = average_cka_scores(cka_result)
+            layer_targets = cka_scores_to_layer_sparsities(
+                masks=masks,
+                cka_scores=latest_cka_scores,
+                base_sparsity=sparsity_config.target_sparsity,
+                strength=cka_target_strength,
+            )
+            _extend_cka_rows(cka_rows, cka_result, round_id)
+
+        update_stats = _empty_dst_stats(global_model, masks)
+        if should_update_mask:
+            guided_dst_config = replace(dst_config, layer_sparsities=layer_targets or None)
+            masks, update_stats = update_sparse_topology(
+                global_model,
+                masks,
+                grad_scores or {},
+                guided_dst_config,
+            )
+
+        metrics = evaluate_model(global_model, test_loader, device=device)
+        summary = sparsity_summary(global_model, masks)
+        row = {
+            "round": round_id,
+            "test_accuracy": metrics["accuracy"],
+            "test_loss": metrics["loss"],
+            "avg_train_loss": avg_train_loss,
+            "cka_computed": int(should_compute_cka),
+            "pruned_weights": update_stats["pruned"],
+            "regrown_weights": update_stats["regrown"],
+            "mask_changes": update_stats["mask_changes"],
+            "total_sparsity": summary["total_sparsity"],
+            "active_params": summary["active_params"],
+            "total_params": summary["total_params"],
+            "layer_sparsity": format_layer_sparsity(summary["layer_sparsity"]),
+            "layer_cka": format_layer_values(latest_cka_scores),
+            "layer_target_sparsity": format_layer_sparsity(layer_targets),
+        }
+        row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
+        row.update(_layer_value_columns("cka", latest_cka_scores, cka_layer_names))
+        row.update(
+            _layer_value_columns(
+                "target_sparsity",
+                layer_targets,
+                sparse_layer_names,
+            )
+        )
+        logs.append(row)
+
+        print(
+            f"Round {round_id:03d} | "
+            f"train_loss={avg_train_loss:.4f} | "
+            f"test_loss={metrics['loss']:.4f} | "
+            f"test_acc={metrics['accuracy']:.4f} | "
+            f"sparsity={summary['total_sparsity']:.4f} | "
+            f"cka={int(should_compute_cka)} | "
+            f"targets={format_layer_sparsity(layer_targets)}"
+        )
+
+    _save_cka_rows_if_requested(cka_rows, cka_log_path)
+    return logs
+
+
 def _resolve_device(device_name: str):
     """Resolve 'auto' to CUDA when available, otherwise CPU."""
 
@@ -435,12 +573,36 @@ def _validate_config(config: FederatedConfig, client_loaders) -> None:
         )
 
 
+def _validate_cka_config(cka_interval: int, cka_target_strength: float) -> None:
+    """Validate CKA-guided sparse training settings."""
+
+    if cka_interval <= 0:
+        raise ValueError("cka_interval must be positive.")
+    if cka_target_strength < 0.0:
+        raise ValueError("cka_target_strength must be non-negative.")
+
+
 def _layer_sparsity_columns(layer_sparsity: dict[str, float]) -> dict[str, float]:
     """Return CSV-friendly per-layer sparsity columns."""
 
     return {
         f"sparsity_{name.replace('.', '_')}": value
         for name, value in sorted(layer_sparsity.items())
+    }
+
+
+def _layer_value_columns(
+    prefix: str,
+    values: dict[str, float],
+    names=None,
+) -> dict[str, float | None]:
+    """Return stable CSV columns for layer-wise values."""
+
+    if names is None:
+        names = sorted(values)
+    return {
+        f"{prefix}_{name.replace('.', '_')}": values.get(name)
+        for name in names
     }
 
 

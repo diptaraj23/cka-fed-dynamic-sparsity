@@ -95,7 +95,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--method",
         type=str,
-        choices=["fedavg", "sparse_fedavg", "feddst"],
+        choices=["fedavg", "sparse_fedavg", "feddst", "cka_feddst"],
         default="fedavg",
         help="Training method to run.",
     )
@@ -128,6 +128,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--log-cka",
         action="store_true",
         help="Compute and save pairwise client CKA after each round.",
+    )
+    parser.add_argument(
+        "--cka-interval",
+        type=int,
+        default=1,
+        help="CKA-guided FedDST interval in communication rounds.",
+    )
+    parser.add_argument(
+        "--cka-target-strength",
+        type=float,
+        default=0.5,
+        help="How strongly CKA scores shift layer-wise sparsity targets.",
     )
     return parser
 
@@ -164,7 +176,13 @@ def main(argv: list[str] | None = None) -> int:
 
     from .data import DataConfig, load_mnist
     from .dst import DSTConfig
-    from .federated import FederatedConfig, run_fedavg, run_feddst, run_sparse_fedavg
+    from .federated import (
+        FederatedConfig,
+        run_cka_feddst,
+        run_fedavg,
+        run_feddst,
+        run_sparse_fedavg,
+    )
     from .models import get_model
     from .sparsity import SparsityConfig
     from .utils import save_csv
@@ -182,7 +200,8 @@ def main(argv: list[str] | None = None) -> int:
     model = get_model("small_cnn", "mnist")
     learning_rate = args.lr
     if learning_rate is None:
-        learning_rate = 0.5 if args.method in {"sparse_fedavg", "feddst"} else 0.05
+        sparse_methods = {"sparse_fedavg", "feddst", "cka_feddst"}
+        learning_rate = 0.5 if args.method in sparse_methods else 0.05
 
     fed_config = FederatedConfig(
         num_clients=args.num_clients,
@@ -192,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
         seed=args.seed,
         device=args.device,
     )
-    if args.method in {"sparse_fedavg", "feddst"}:
+    if args.method in {"sparse_fedavg", "feddst", "cka_feddst"}:
         sparsity_config = SparsityConfig(
             target_sparsity=args.sparsity,
             init_method=args.sparsity_init,
@@ -206,10 +225,27 @@ def main(argv: list[str] | None = None) -> int:
         f"_sparsity{sparsity_text}_seed{args.seed}.csv"
     )
     cka_log_path = None
-    if args.log_cka:
+    if args.log_cka or args.method == "cka_feddst":
         cka_log_path = args.output_dir / "logs" / log_name.replace(".csv", "_cka.csv")
 
-    if args.method == "feddst":
+    if args.method == "cka_feddst":
+        dst_config = DSTConfig(
+            mask_update_interval=args.mask_update_interval,
+            prune_fraction=args.prune_fraction,
+        )
+        logs = run_cka_feddst(
+            model,
+            client_loaders,
+            test_loader,
+            reference_loader,
+            fed_config,
+            sparsity_config,
+            dst_config,
+            cka_interval=args.cka_interval,
+            cka_target_strength=args.cka_target_strength,
+            cka_log_path=cka_log_path,
+        )
+    elif args.method == "feddst":
         dst_config = DSTConfig(
             mask_update_interval=args.mask_update_interval,
             prune_fraction=args.prune_fraction,
