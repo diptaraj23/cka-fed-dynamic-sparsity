@@ -293,10 +293,24 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
     else:
         raise ValueError(f"Unknown method: {method}")
 
+    history = add_log_metadata(history, config)
     save_csv(history, paths["log"])
     if bool(config["save_checkpoint"]):
         torch.save(model.state_dict(), paths["checkpoint"])
     return history
+
+
+def add_log_metadata(history: list[dict], config: dict) -> list[dict]:
+    """Add run-level metadata to every training log row."""
+
+    sparsity = 0.0 if str(config["method"]) == "fedavg" else config.get("sparsity", 0.0)
+    metadata = {
+        "method": str(config["method"]),
+        "dataset": str(config["dataset"]),
+        "sparsity": float(sparsity),
+        "seed": int(config["seed"]),
+    }
+    return [{**metadata, **row} for row in history]
 
 
 def _should_write_cka_log(config: dict) -> bool:

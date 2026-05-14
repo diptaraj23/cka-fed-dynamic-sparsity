@@ -1,0 +1,30 @@
+column,meaning
+method,Training method that produced the row.
+dataset,Dataset used for the run.
+sparsity,Sparsity level for the run.
+seed,Random seed used for data partitioning and training setup.
+round,Communication round number.
+test_accuracy,Global model accuracy on the held-out test set after the round.
+test_loss,Global model cross-entropy loss on the held-out test set after the round.
+avg_train_loss,Client training loss averaged by client dataset size for the round.
+cka_computed,1 if CKA was computed in this round and 0 otherwise.
+pruned_weights,Number of active weights removed during the mask update for this round.
+regrown_weights,Number of inactive weights activated during the mask update for this round.
+mask_changes,Total number of binary mask entries that changed during the round.
+total_sparsity,Fraction of all maskable weights that are inactive.
+active_params,Number of active maskable weight parameters.
+total_params,Total number of maskable weight parameters.
+layer_sparsity,Compact semicolon-separated layer sparsity summary.
+layer_cka,Compact semicolon-separated average CKA scores by measured layer.
+layer_target_sparsity,Compact semicolon-separated CKA-guided sparsity targets by adapted layer.
+sparsity_conv1_weight,Sparsity of the conv1 weight tensor.
+sparsity_conv2_weight,Sparsity of the conv2 weight tensor.
+sparsity_fc1_weight,Sparsity of the fc1 weight tensor.
+sparsity_fc2_weight,Sparsity of the fc2 classifier weight tensor.
+cka_conv1,Average pairwise CKA score for conv1 client activations.
+cka_conv2,Average pairwise CKA score for conv2 client activations.
+cka_fc1,Average pairwise CKA score for fc1 client activations.
+target_sparsity_conv1_weight,CKA-guided sparsity target for conv1.weight.
+target_sparsity_conv2_weight,CKA-guided sparsity target for conv2.weight.
+target_sparsity_fc1_weight,CKA-guided sparsity target for fc1.weight.
+target_sparsity_fc2_weight,Blank because fc2.weight is not CKA-guided.

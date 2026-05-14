@@ -1,0 +1,8 @@
+column,meaning
+round,Communication round number when the CKA matrix was computed.
+layer,Layer name for this pairwise CKA entry.
+client_i,First client index in the pairwise comparison.
+client_j,Second client index in the pairwise comparison.
+cka,Linear CKA similarity between client_i and client_j for the given layer.
+average_layer_cka,Average strict upper-triangle CKA for this layer across all client pairs.
+num_reference_samples,Number of shared reference examples used to compute activations.

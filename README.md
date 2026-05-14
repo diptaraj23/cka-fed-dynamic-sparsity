@@ -130,10 +130,31 @@ Run all four MNIST methods sequentially:
 python experiments/run_all_mnist.py
 ```
 
+Run the main sparsity sweep. This runs dense FedAvg once, then Sparse FedAvg,
+FedDST, and CKA-FedDST at `0.5, 0.7, 0.8, 0.9, 0.95` sparsity:
+
+```bash
+python experiments/run_experiment.py
+```
+
+Preview the sparsity sweep commands without launching experiments:
+
+```bash
+python experiments/run_experiment.py --dry_run
+```
+
+Run selected sparsity levels or methods:
+
+```bash
+python experiments/run_experiment.py --sparsities 0.8 0.9
+python experiments/run_experiment.py --methods feddst cka_feddst
+```
+
 Generate plots from saved logs:
 
 ```bash
 python experiments/plot_results.py
+python experiments/plot_results.py --log_dir results/logs --plot_dir results/plots
 ```
 
 ## Logs and Plots
@@ -168,12 +189,12 @@ results/plots/
 
 Generated plots include:
 
-- test accuracy vs communication rounds
-- test loss vs communication rounds
-- total sparsity vs rounds
-- layer-wise sparsity vs rounds
-- layer-wise CKA vs rounds for CKA-guided FedDST
-- final method comparison bar chart
+- accuracy vs communication rounds for all method-sparsity combinations
+- final accuracy vs sparsity
+- best accuracy vs sparsity
+- accuracy vs communication cost when a cost proxy is logged
+- CKA-FedDST layer-wise sparsity vs rounds
+- CKA-FedDST layer-wise CKA vs rounds
 
 ## Current Limitations
 

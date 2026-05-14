@@ -1,0 +1,9 @@
+column,meaning
+method,Training method that produced the row.
+dataset,Dataset used for the run.
+sparsity,Sparsity level for the run; FedAvg uses 0.0 as the dense baseline.
+seed,Random seed used for data partitioning and training setup.
+round,Communication round number.
+test_accuracy,Global model accuracy on the held-out test set after the round.
+test_loss,Global model cross-entropy loss on the held-out test set after the round.
+avg_train_loss,Client training loss averaged by client dataset size for the round.

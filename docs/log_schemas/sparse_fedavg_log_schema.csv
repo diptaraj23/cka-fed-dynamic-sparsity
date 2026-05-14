@@ -1,0 +1,17 @@
+column,meaning
+method,Training method that produced the row.
+dataset,Dataset used for the run.
+sparsity,Sparsity level for the run.
+seed,Random seed used for data partitioning and training setup.
+round,Communication round number.
+test_accuracy,Global model accuracy on the held-out test set after the round.
+test_loss,Global model cross-entropy loss on the held-out test set after the round.
+avg_train_loss,Client training loss averaged by client dataset size for the round.
+total_sparsity,Fraction of all maskable weights that are inactive.
+active_params,Number of active maskable weight parameters.
+total_params,Total number of maskable weight parameters.
+layer_sparsity,Compact semicolon-separated layer sparsity summary.
+sparsity_conv1_weight,Sparsity of the conv1 weight tensor.
+sparsity_conv2_weight,Sparsity of the conv2 weight tensor.
+sparsity_fc1_weight,Sparsity of the fc1 weight tensor.
+sparsity_fc2_weight,Sparsity of the fc2 classifier weight tensor.
