@@ -10,6 +10,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import pandas as pd
 
 
@@ -20,6 +21,40 @@ METHOD_LABELS = {
     "sparse_fedavg": "Sparse FedAvg",
     "feddst": "FedDST",
     "cka_feddst": "CKA-FedDST",
+}
+METHOD_COLORS = {
+    "fedavg": "#333333",
+    "sparse_fedavg": "#4C78A8",
+    "feddst": "#F58518",
+    "cka_feddst": "#54A24B",
+}
+METHOD_MARKERS = {
+    "fedavg": "*",
+    "sparse_fedavg": "o",
+    "feddst": "s",
+    "cka_feddst": "^",
+}
+SPARSITY_STYLES = {
+    0.0: {"marker": "*", "linestyle": "-", "label": "dense"},
+    0.5: {"marker": "o", "linestyle": "-", "label": "s=0.5"},
+    0.7: {"marker": "s", "linestyle": "--", "label": "s=0.7"},
+    0.8: {"marker": "^", "linestyle": "-.", "label": "s=0.8"},
+    0.9: {"marker": "D", "linestyle": ":", "label": "s=0.9"},
+    0.95: {"marker": "X", "linestyle": (0, (3, 1, 1, 1)), "label": "s=0.95"},
+}
+SPARSITY_COLORS = {
+    0.0: "#333333",
+    0.5: "#4C78A8",
+    0.7: "#F58518",
+    0.8: "#54A24B",
+    0.9: "#B279A2",
+    0.95: "#E45756",
+}
+LAYER_LINESTYLES = {
+    "conv1": "-",
+    "conv2": "--",
+    "fc1": "-.",
+    "fc2": ":",
 }
 COMMUNICATION_COLUMNS = (
     "communication_cost",
@@ -173,18 +208,19 @@ def plot_accuracy_vs_rounds(logs: pd.DataFrame, plot_dir: Path) -> Path | None:
         print("Warning: cannot plot accuracy vs rounds; no accuracy data.")
         return None
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 6.5))
     for _, group in sorted_sources(logs):
         group = group.sort_values("round")
-        label = method_sparsity_label(group)
-        ax.plot(group["round"], group["test_accuracy"], marker="o", label=label)
+        plot_method_sparsity_line(ax, group, "round", "test_accuracy")
 
     style_axes(
         ax,
         "Test Accuracy vs Communication Rounds",
         "Communication Round",
         "Test Accuracy",
+        show_legend=False,
     )
+    add_method_sparsity_legends(ax, logs)
     return save_figure(fig, plot_dir / "accuracy_vs_rounds_all_sparsities.png")
 
 
@@ -199,6 +235,7 @@ def plot_final_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path 
     finals = final_rows(sparse_logs)
     fig, ax = plt.subplots(figsize=(8, 5))
     plotted = False
+    add_dense_reference_line(ax, final_rows(logs), "FedAvg dense baseline")
     for method in SPARSE_METHODS:
         method_rows = finals[finals["method"] == method].sort_values("sparsity")
         if method_rows.empty:
@@ -206,8 +243,10 @@ def plot_final_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path 
         ax.plot(
             method_rows["sparsity"],
             method_rows["test_accuracy"],
-            marker="o",
-            linewidth=2,
+            color=method_color(method),
+            marker=METHOD_MARKERS.get(method, "o"),
+            linewidth=2.4,
+            markersize=7,
             label=METHOD_LABELS[method],
         )
         plotted = True
@@ -223,6 +262,7 @@ def plot_final_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path 
         "Sparsity",
         "Final Test Accuracy",
     )
+    ax.legend(title="Method", fontsize=8)
     return save_figure(fig, plot_dir / "final_accuracy_vs_sparsity.png")
 
 
@@ -237,6 +277,7 @@ def plot_best_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path |
     best = best_rows(sparse_logs)
     fig, ax = plt.subplots(figsize=(8, 5))
     plotted = False
+    add_dense_reference_line(ax, best_rows(logs), "FedAvg dense best")
     for method in SPARSE_METHODS:
         method_rows = best[best["method"] == method].sort_values("sparsity")
         if method_rows.empty:
@@ -244,8 +285,10 @@ def plot_best_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path |
         ax.plot(
             method_rows["sparsity"],
             method_rows["test_accuracy"],
-            marker="o",
-            linewidth=2,
+            color=method_color(method),
+            marker=METHOD_MARKERS.get(method, "o"),
+            linewidth=2.4,
+            markersize=7,
             label=METHOD_LABELS[method],
         )
         plotted = True
@@ -261,6 +304,7 @@ def plot_best_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path |
         "Sparsity",
         "Best Test Accuracy",
     )
+    ax.legend(title="Method", fontsize=8)
     return save_figure(fig, plot_dir / "best_accuracy_vs_sparsity.png")
 
 
@@ -283,18 +327,24 @@ def plot_accuracy_vs_communication_cost(
         print("Warning: communication cost values are empty; skipping cost plot.")
         return None
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 6.5))
     for _, group in sorted_sources(cost_logs):
         group = group.sort_values("round")
-        label = method_sparsity_label(group)
-        ax.plot(group[x_column], group["test_accuracy"], marker="o", label=label)
+        plot_method_sparsity_line(ax, group, x_column, "test_accuracy")
 
     xlabel = {
         "communication_cost": "Communication Cost",
         "active_params_transmitted": "Active Parameters Transmitted",
         "active_params": "Active Parameters",
     }[x_column]
-    style_axes(ax, "Accuracy vs Communication Cost", xlabel, "Test Accuracy")
+    style_axes(
+        ax,
+        "Accuracy vs Communication Cost",
+        xlabel,
+        "Test Accuracy",
+        show_legend=False,
+    )
+    add_method_sparsity_legends(ax, cost_logs)
     return save_figure(fig, plot_dir / "accuracy_vs_communication_cost.png")
 
 
@@ -310,22 +360,36 @@ def plot_cka_feddst_layerwise_sparsity(
         print("Warning: no CKA-FedDST layer-wise sparsity columns found.")
         return None
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    plotted_layers: set[str] = set()
     for _, group in sorted_sources(cka_logs):
-        sparsity = format_sparsity(group["sparsity"].iloc[0])
+        sparsity = group["sparsity"].iloc[0]
+        style = sparsity_style(sparsity)
         group = group.sort_values("round")
         for column in columns:
             values = pd.to_numeric(group[column], errors="coerce")
             if values.notna().any():
-                label = f"s={sparsity} {pretty_layer(column)}"
-                ax.plot(group["round"], values, marker="o", label=label)
+                layer = pretty_layer(column)
+                plotted_layers.add(layer)
+                ax.plot(
+                    group["round"],
+                    values,
+                    color=sparsity_color(sparsity),
+                    marker=style["marker"],
+                    linestyle=layer_linestyle(layer),
+                    linewidth=1.8,
+                    markersize=5,
+                    label="_nolegend_",
+                )
 
     style_axes(
         ax,
         "CKA-FedDST Layer-wise Sparsity",
         "Communication Round",
         "Layer Sparsity",
+        show_legend=False,
     )
+    add_sparsity_layer_legends(ax, cka_logs, sorted(plotted_layers))
     return save_figure(fig, plot_dir / "cka_feddst_layerwise_sparsity.png")
 
 
@@ -339,22 +403,36 @@ def plot_cka_feddst_layerwise_cka(
     cka_logs = logs[logs["method"] == "cka_feddst"]
     columns = cka_value_columns(cka_logs)
     if not cka_logs.empty and columns:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(12, 6.5))
+        plotted_layers: set[str] = set()
         for _, group in sorted_sources(cka_logs):
-            sparsity = format_sparsity(group["sparsity"].iloc[0])
+            sparsity = group["sparsity"].iloc[0]
+            style = sparsity_style(sparsity)
             group = group.sort_values("round")
             for column in columns:
                 values = pd.to_numeric(group[column], errors="coerce")
                 if values.notna().any():
-                    label = f"s={sparsity} {pretty_layer(column)}"
-                    ax.plot(group["round"], values, marker="o", label=label)
+                    layer = pretty_layer(column)
+                    plotted_layers.add(layer)
+                    ax.plot(
+                        group["round"],
+                        values,
+                        color=sparsity_color(sparsity),
+                        marker=style["marker"],
+                        linestyle=layer_linestyle(layer),
+                        linewidth=1.8,
+                        markersize=5,
+                        label="_nolegend_",
+                    )
 
         style_axes(
             ax,
             "CKA-FedDST Layer-wise CKA",
             "Communication Round",
             "Average Pairwise CKA",
+            show_legend=False,
         )
+        add_sparsity_layer_legends(ax, cka_logs, sorted(plotted_layers))
         return save_figure(fig, plot_dir / "cka_feddst_layerwise_cka.png")
 
     pairwise = pairwise_cka[pairwise_cka["method"] == "cka_feddst"]
@@ -368,17 +446,24 @@ def plot_cka_feddst_layerwise_cka(
         print("Warning: CKA pairwise logs contain no plottable CKA values.")
         return None
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 6.5))
     grouped = pairwise.groupby(["source_file", "layer"], sort=False)
+    plotted_layers: set[str] = set()
     for (_, layer), group in grouped:
-        sparsity = format_sparsity(group["sparsity"].iloc[0])
+        sparsity = group["sparsity"].iloc[0]
+        style = sparsity_style(sparsity)
+        plotted_layers.add(str(layer))
         group = group.sort_values("round")
         by_round = group.groupby("round", as_index=False)["average_layer_cka"].mean()
         ax.plot(
             by_round["round"],
             by_round["average_layer_cka"],
-            marker="o",
-            label=f"s={sparsity} {layer}",
+            color=sparsity_color(sparsity),
+            marker=style["marker"],
+            linestyle=layer_linestyle(str(layer)),
+            linewidth=1.8,
+            markersize=5,
+            label="_nolegend_",
         )
 
     style_axes(
@@ -386,7 +471,9 @@ def plot_cka_feddst_layerwise_cka(
         "CKA-FedDST Layer-wise CKA",
         "Communication Round",
         "Average Pairwise CKA",
+        show_legend=False,
     )
+    add_sparsity_layer_legends(ax, pairwise, sorted(plotted_layers))
     return save_figure(fig, plot_dir / "cka_feddst_layerwise_cka.png")
 
 
@@ -504,6 +591,212 @@ def method_sparsity_label(group: pd.DataFrame) -> str:
     return f"{label} s={format_sparsity(group['sparsity'].iloc[0])}"
 
 
+def plot_method_sparsity_line(
+    ax,
+    group: pd.DataFrame,
+    x_column: str,
+    y_column: str,
+) -> None:
+    """Plot one source log with color as method and marker/style as sparsity."""
+
+    method = str(group["method"].iloc[0])
+    sparsity = group["sparsity"].iloc[0]
+    style = sparsity_style(sparsity)
+    ax.plot(
+        group[x_column],
+        group[y_column],
+        color=method_color(method),
+        marker=style["marker"],
+        linestyle=style["linestyle"],
+        linewidth=2.2 if method == "fedavg" else 1.8,
+        markersize=7 if method == "fedavg" else 5.5,
+        label="_nolegend_",
+    )
+
+
+def add_dense_reference_line(
+    ax,
+    rows: pd.DataFrame,
+    label: str,
+) -> None:
+    """Draw FedAvg as a dense reference on sparsity summary plots."""
+
+    fedavg_rows = rows[rows["method"] == "fedavg"]
+    if fedavg_rows.empty or "test_accuracy" not in fedavg_rows.columns:
+        return
+    value = pd.to_numeric(fedavg_rows["test_accuracy"], errors="coerce").dropna()
+    if value.empty:
+        return
+    ax.axhline(
+        value.iloc[0],
+        color=method_color("fedavg"),
+        linestyle="--",
+        linewidth=2,
+        label=label,
+    )
+
+
+def add_method_sparsity_legends(ax, logs: pd.DataFrame) -> None:
+    """Add separate legends for method colors and sparsity symbols."""
+
+    methods = [method for method in METHOD_ORDER if method in set(logs["method"])]
+    method_handles = [
+        Line2D(
+            [0],
+            [0],
+            color=method_color(method),
+            linewidth=3,
+            label=METHOD_LABELS.get(method, method),
+        )
+        for method in methods
+    ]
+    sparsity_handles = [
+        Line2D(
+            [0],
+            [0],
+            color="#333333",
+            marker=sparsity_style(value)["marker"],
+            linestyle=sparsity_style(value)["linestyle"],
+            linewidth=2,
+            markersize=6,
+            label=sparsity_label(value),
+        )
+        for value in unique_sparsities(logs)
+    ]
+
+    if method_handles:
+        method_legend = ax.legend(
+            handles=method_handles,
+            title="Method color",
+            loc="upper left",
+            bbox_to_anchor=(1.02, 1.0),
+            fontsize=8,
+        )
+        ax.add_artist(method_legend)
+    if sparsity_handles:
+        ax.legend(
+            handles=sparsity_handles,
+            title="Sparsity symbol",
+            loc="lower left",
+            bbox_to_anchor=(1.02, 0.0),
+            fontsize=8,
+        )
+
+
+def add_sparsity_layer_legends(
+    ax,
+    logs: pd.DataFrame,
+    layers: list[str],
+) -> None:
+    """Add separate legends for sparsity colors/symbols and layer line styles."""
+
+    sparsity_handles = [
+        Line2D(
+            [0],
+            [0],
+            color=sparsity_color(value),
+            marker=sparsity_style(value)["marker"],
+            linestyle="-",
+            linewidth=2,
+            markersize=6,
+            label=sparsity_label(value),
+        )
+        for value in unique_sparsities(logs)
+        if value != 0.0
+    ]
+    layer_handles = [
+        Line2D(
+            [0],
+            [0],
+            color="#333333",
+            linestyle=layer_linestyle(layer),
+            linewidth=2,
+            label=layer,
+        )
+        for layer in layers
+    ]
+
+    if sparsity_handles:
+        sparsity_legend = ax.legend(
+            handles=sparsity_handles,
+            title="Sparsity",
+            loc="upper left",
+            bbox_to_anchor=(1.02, 1.0),
+            fontsize=8,
+        )
+        ax.add_artist(sparsity_legend)
+    if layer_handles:
+        ax.legend(
+            handles=layer_handles,
+            title="Layer",
+            loc="lower left",
+            bbox_to_anchor=(1.02, 0.0),
+            fontsize=8,
+        )
+
+
+def unique_sparsities(logs: pd.DataFrame) -> list[float]:
+    """Return stable, sorted sparsity values from a log frame."""
+
+    if logs.empty or "sparsity" not in logs.columns:
+        return []
+    values = pd.to_numeric(logs["sparsity"], errors="coerce").dropna()
+    unique = sorted({sparsity_key(value) for value in values})
+    return [value for value in unique if not pd.isna(value)]
+
+
+def method_color(method: str) -> str:
+    """Return the color assigned to a method."""
+
+    return METHOD_COLORS.get(method, "#777777")
+
+
+def sparsity_color(value) -> str:
+    """Return a color assigned to a sparsity level."""
+
+    key = sparsity_key(value)
+    return SPARSITY_COLORS.get(key, "#777777")
+
+
+def sparsity_style(value) -> dict:
+    """Return marker and line style assigned to a sparsity level."""
+
+    key = sparsity_key(value)
+    if key in SPARSITY_STYLES:
+        return SPARSITY_STYLES[key]
+    return {"marker": "o", "linestyle": "-", "label": sparsity_label(value)}
+
+
+def sparsity_label(value) -> str:
+    """Return a human-readable sparsity label."""
+
+    key = sparsity_key(value)
+    if key in SPARSITY_STYLES:
+        return SPARSITY_STYLES[key]["label"]
+    if pd.isna(key):
+        return "s=unknown"
+    return f"s={format_sparsity(key)}"
+
+
+def sparsity_key(value) -> float:
+    """Normalize sparsity floats so legends are stable across CSVs."""
+
+    if pd.isna(value):
+        return float("nan")
+    value = float(value)
+    known = sorted(SPARSITY_STYLES)
+    nearest = min(known, key=lambda candidate: abs(candidate - value))
+    if abs(nearest - value) < 1e-6:
+        return nearest
+    return round(value, 4)
+
+
+def layer_linestyle(layer: str):
+    """Return the line style assigned to a CKA layer."""
+
+    return LAYER_LINESTYLES.get(layer, "-")
+
+
 def format_sparsity(value) -> str:
     """Format sparsity values for labels."""
 
@@ -551,13 +844,22 @@ def pretty_layer(column: str) -> str:
     return column.replace("_weight", "").replace("_", ".")
 
 
-def style_axes(ax, title: str, xlabel: str, ylabel: str) -> None:
+def style_axes(
+    ax,
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    show_legend: bool = True,
+) -> None:
     """Apply consistent labels, legend, and grid."""
 
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid(True, linestyle="--", linewidth=0.6, alpha=0.6)
+    ax.margins(x=0.03)
+    if not show_legend:
+        return
     handles, labels = ax.get_legend_handles_labels()
     if handles:
         ax.legend(fontsize=8)
@@ -568,7 +870,7 @@ def save_figure(fig, output_path: Path) -> Path:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=160)
+    fig.savefig(output_path, dpi=160, bbox_inches="tight")
     plt.close(fig)
     return output_path
 

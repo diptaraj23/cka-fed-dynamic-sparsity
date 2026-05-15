@@ -32,6 +32,30 @@ The plotting script:
 
 The current plots were generated on 2026-05-15 from logs created on 2026-05-11.
 
+## Visual Encoding
+
+The plots now use fixed encodings so method identity and sparsity level are easy to separate visually.
+
+For method-comparison plots:
+
+- color identifies the method:
+  - FedAvg: dark gray
+  - Sparse FedAvg: blue
+  - FedDST: orange
+  - CKA-FedDST: green
+- marker shape and line style identify sparsity:
+  - dense: star, solid line
+  - s=0.5: circle, solid line
+  - s=0.7: square, dashed line
+  - s=0.8: triangle, dash-dot line
+  - s=0.9: diamond, dotted line
+  - s=0.95: X marker, patterned dashed line
+
+For CKA-FedDST layer-wise plots, the method is fixed, so the encoding changes:
+
+- color and marker identify sparsity level
+- line style identifies layer
+
 ## Plot: `accuracy_vs_rounds_all_sparsities.png`
 
 ### How It Was Calculated
@@ -48,7 +72,7 @@ The current plots were generated on 2026-05-15 from logs created on 2026-05-11.
 - The title states that the figure tracks test accuracy over communication rounds.
 - The x-axis shows the number of federated communication rounds completed.
 - The y-axis shows global test accuracy after aggregation and evaluation.
-- The legend identifies each method and sparsity level.
+- Separate legends identify method color and sparsity symbol.
 - The grid helps compare convergence speed and final accuracy across curves.
 
 ### Analysis
@@ -71,10 +95,11 @@ The main visual takeaway should be that fixed sparse training becomes fragile at
 ### How It Was Calculated
 
 - Source columns: `round`, `test_accuracy`, `method`, `sparsity`
-- Only sparse methods are included:
+- Sparse methods are plotted as lines:
   - Sparse FedAvg
   - FedDST
   - CKA-FedDST
+- Dense FedAvg is shown as a horizontal reference line.
 - For each method-sparsity pair, the final row after sorting by `round` is selected.
 - X-axis: target sparsity level
 - Y-axis: final test accuracy at the last communication round
@@ -84,7 +109,8 @@ The main visual takeaway should be that fixed sparse training becomes fragile at
 - The title says the plot compares final performance under different sparsity levels.
 - The x-axis increases from less sparse to more sparse.
 - The y-axis shows final test accuracy after 20 rounds.
-- Each line is one sparse method.
+- Each colored line is one sparse method.
+- The dark gray dashed horizontal line is the dense FedAvg reference accuracy.
 
 ### Analysis
 
@@ -110,7 +136,8 @@ CKA-FedDST is slightly better than FedDST at 0.5, 0.7, 0.8, and 0.95, but slight
 ### How It Was Calculated
 
 - Source columns: `round`, `test_accuracy`, `method`, `sparsity`
-- Only sparse methods are included.
+- Sparse methods are plotted as lines.
+- Dense FedAvg is shown as a horizontal reference line.
 - For each method-sparsity pair, the row with maximum `test_accuracy` is selected.
 - X-axis: target sparsity level
 - Y-axis: best test accuracy achieved during training
@@ -120,7 +147,8 @@ CKA-FedDST is slightly better than FedDST at 0.5, 0.7, 0.8, and 0.95, but slight
 - The title says the plot compares peak performance, not final performance.
 - The x-axis is sparsity.
 - The y-axis is the best global test accuracy observed at any round.
-- Each line represents one sparse method.
+- Each colored line represents one sparse method.
+- The dark gray dashed horizontal line is the best dense FedAvg accuracy.
 
 ### Analysis
 
@@ -210,7 +238,7 @@ Still, it shows an important pattern: FedDST and CKA-FedDST maintain high accura
 - The title says the figure tracks how sparsity changes layer by layer.
 - The x-axis shows federated rounds.
 - The y-axis shows the fraction of inactive weights in a layer.
-- The legend identifies both base sparsity and layer.
+- Separate legends identify sparsity color/symbol and layer line style.
 
 ### Analysis
 
@@ -259,6 +287,7 @@ The layer-wise adjustments are modest. This is expected because `cka_strength` i
 - The y-axis shows average pairwise CKA across clients.
 - Higher CKA means clients have more similar representations for that layer.
 - Lower CKA means client representations are more different.
+- Separate legends identify sparsity color/symbol and layer line style.
 
 ### Analysis
 
