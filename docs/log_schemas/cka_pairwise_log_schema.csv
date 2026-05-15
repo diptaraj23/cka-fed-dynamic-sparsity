@@ -1,4 +1,10 @@
 column,meaning
+method,Training method that produced the CKA rows.
+dataset,Dataset used for the run.
+sparsity,Sparsity level for the run.
+seed,Random seed used for data partitioning and training setup.
+split_manifest_path,Path to the JSON file containing exact client and CKA reference indices.
+cka_strength,CKA-guidance strength for CKA-FedDST rows; blank for non-CKA-guided methods.
 round,Communication round number when the CKA matrix was computed.
 layer,Layer name for this pairwise CKA entry.
 client_i,First client index in the pairwise comparison.

@@ -3,9 +3,12 @@ method,Training method that produced the row.
 dataset,Dataset used for the run.
 sparsity,Sparsity level for the run.
 seed,Random seed used for data partitioning and training setup.
+split_manifest_path,Path to the JSON file containing exact client and CKA reference indices.
+cka_strength,Blank for FedDST; included for schema consistency across methods.
 round,Communication round number.
 test_accuracy,Global model accuracy on the held-out test set after the round.
 test_loss,Global model cross-entropy loss on the held-out test set after the round.
+evaluated,1 if test metrics were computed on this round and 0 if skipped by eval_interval.
 avg_train_loss,Client training loss averaged by client dataset size for the round.
 pruned_weights,Number of active weights removed during the mask update for this round.
 regrown_weights,Number of inactive weights activated during the mask update for this round.

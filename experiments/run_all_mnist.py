@@ -1,4 +1,8 @@
-"""Run all MNIST experiment configs sequentially."""
+"""Legacy helper to run one MNIST run per method.
+
+The main reproducible suite runner is ``experiments/run_experiment.py``. This
+script is kept only as a small convenience entry point for quick local checks.
+"""
 
 from __future__ import annotations
 

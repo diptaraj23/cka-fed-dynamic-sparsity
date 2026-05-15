@@ -1,4 +1,8 @@
-"""Run MNIST sparse methods across multiple sparsity levels."""
+"""Legacy helper for a flat single-seed MNIST sparsity sweep.
+
+The main reproducible suite runner is ``experiments/run_experiment.py``. This
+script is kept only as a compatibility wrapper for the older workflow.
+"""
 
 from __future__ import annotations
 

@@ -6,6 +6,18 @@ This repository is a research prototype for simulated federated learning on MNIS
 
 The proposed direction is to use layer-wise client representation similarity, measured with linear Centered Kernel Alignment (CKA), to guide how sparsity is allocated across layers during dynamic sparse federated learning.
 
+## Installation
+
+This prototype is tested with Python 3.12 on CPU. A GPU can be used through
+PyTorch when available, but the default `device: auto` setting also works on
+CPU.
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install -r requirements.txt
+```
+
 ## Methods Compared
 
 This project currently supports four methods:
@@ -33,7 +45,10 @@ Training data is split across simulated clients using Dirichlet label-skew parti
 - lower `alpha` gives stronger non-IID label skew
 - `seed` controls deterministic partitioning
 
-The test set remains global. A small balanced reference set is also sampled from the test data for CKA computation.
+The test set remains global and is used only for evaluation. A small balanced
+reference set is reserved from the MNIST training split for CKA computation, and
+those reference examples are excluded from client training. Each run saves the
+exact client/reference indices as a split manifest for reproducibility.
 
 ## Model Architecture
 
@@ -124,12 +139,6 @@ Command-line arguments override YAML values only when explicitly provided:
 python -m src.train --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.9
 ```
 
-Run all four MNIST methods sequentially:
-
-```bash
-python experiments/run_all_mnist.py
-```
-
 Run the main sparsity sweep. This runs dense FedAvg once, then Sparse FedAvg,
 FedDST, and CKA-FedDST at `0.5, 0.7, 0.8, 0.9, 0.95` sparsity:
 
@@ -150,12 +159,42 @@ python experiments/run_experiment.py --sparsities 0.8 0.9
 python experiments/run_experiment.py --methods feddst cka_feddst
 ```
 
+Run multi-seed and CKA-strength research suites:
+
+```bash
+python experiments/run_experiment.py --suite multiseed
+python experiments/run_experiment.py --suite cka_strength
+python experiments/run_experiment.py --suite all
+```
+
+Preview a suite without launching training:
+
+```bash
+python experiments/run_experiment.py --suite all --dry_run
+```
+
 Generate plots from saved logs:
 
 ```bash
 python experiments/plot_results.py
 python experiments/plot_results.py --log_dir results/logs --plot_dir results/plots
 ```
+
+For suite-specific figures, point the plotting script at one suite folder:
+
+```bash
+python experiments/plot_results.py \
+  --log_dir results/logs/multiseed/<suite_id> \
+  --plot_dir results/plots/multiseed/<suite_id>
+
+python experiments/plot_results.py \
+  --log_dir results/logs/cka_strength_sweep/<suite_id> \
+  --plot_dir results/plots/cka_strength_sweep/<suite_id>
+```
+
+Legacy runners such as `experiments/run_all_mnist.py` and
+`experiments/run_sparsity_sweep_mnist.py` are kept for reference, but
+`experiments/run_experiment.py` is the main runner.
 
 ## Logs and Plots
 
@@ -167,6 +206,19 @@ results/logs/
 
 Each run also saves the final merged configuration next to the CSV log for
 reproducibility.
+
+The organized suite runner writes results under timestamped folders, for
+example:
+
+```text
+results/logs/multiseed/<suite_id>/seed_42/
+results/logs/cka_strength_sweep/<suite_id>/strength_0p8/seed_42/
+results/plots/multiseed/<suite_id>/
+results/plots/cka_strength_sweep/<suite_id>/
+```
+
+Each suite also writes a `manifest.csv` describing the planned command, method,
+seed, sparsity, CKA strength, output folders, and run status.
 
 Logs include, depending on the method:
 
@@ -180,6 +232,12 @@ Logs include, depending on the method:
 - mask changes
 - layer-wise CKA
 - CKA-guided target sparsity
+- run metadata such as method, dataset, sparsity, seed, CKA strength, and split
+  manifest path
+
+Data split manifests are saved under a `splits/` folder inside the active log
+directory. These JSON files record exact client indices, reference indices, and
+label distributions.
 
 Plots are saved to:
 
@@ -195,6 +253,13 @@ Generated plots include:
 - accuracy vs communication cost when a cost proxy is logged
 - CKA-FedDST layer-wise sparsity vs rounds
 - CKA-FedDST layer-wise CKA vs rounds
+- mean/std multi-seed accuracy curves
+- CKA-strength sweep summaries
+
+When generating paper-style plots, use one suite folder at a time. Plotting the
+top-level `results/logs/` folder can intentionally combine old flat logs,
+archived runs, and multiple suites, which is useful for exploration but easier
+to misinterpret.
 
 ## Current Limitations
 
@@ -210,6 +275,16 @@ Current limitations:
 - CKA-guided target allocation is heuristic
 - no explicit communication-cost accounting yet
 - no checkpoint-based experiment resume support yet
+
+## Lightweight Validation
+
+Run basic smoke tests without downloading MNIST or launching long experiments:
+
+```bash
+python -m src.train --help
+python experiments/run_experiment.py --suite all --dry_run
+python -m unittest discover -s tests
+```
 
 ## Future Work
 
@@ -234,6 +309,7 @@ results/
   logs/                  CSV training and CKA logs
   checkpoints/           Saved model checkpoints
   plots/                 Generated figures
+archive/                 Tracked older experiment artifacts kept separate
 src/
   data.py                MNIST loading and non-IID partitioning
   models.py              SmallCNN model definition

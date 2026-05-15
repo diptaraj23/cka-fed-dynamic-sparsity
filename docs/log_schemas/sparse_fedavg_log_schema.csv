@@ -3,9 +3,12 @@ method,Training method that produced the row.
 dataset,Dataset used for the run.
 sparsity,Sparsity level for the run.
 seed,Random seed used for data partitioning and training setup.
+split_manifest_path,Path to the JSON file containing exact client and CKA reference indices.
+cka_strength,Blank for Sparse FedAvg; included for schema consistency across methods.
 round,Communication round number.
 test_accuracy,Global model accuracy on the held-out test set after the round.
 test_loss,Global model cross-entropy loss on the held-out test set after the round.
+evaluated,1 if test metrics were computed on this round and 0 if skipped by eval_interval.
 avg_train_loss,Client training loss averaged by client dataset size for the round.
 total_sparsity,Fraction of all maskable weights that are inactive.
 active_params,Number of active maskable weight parameters.
