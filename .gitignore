@@ -15,13 +15,13 @@ __pycache__/
 data/
 
 # Generated experiment outputs
-results/logs/*
-!results/logs/.gitkeep
-results/checkpoints/*
-!results/checkpoints/.gitkeep
-results/plots/*
-!results/plots/.gitkeep
-results/_run_all_tmp/
+#esults/logs/*
+#results/logs/.gitkeep
+#esults/checkpoints/*
+#results/checkpoints/.gitkeep
+#esults/plots/*
+#results/plots/.gitkeep
+#esults/_run_all_tmp/
 
 # Model artifacts
 *.pt
