@@ -176,9 +176,14 @@ def average_cka_scores(cka_result: dict) -> dict[str, float]:
     }
 
 
-def cka_to_rows(cka_result: dict, round_id: int | None = None) -> list[dict]:
+def cka_to_rows(
+    cka_result: dict,
+    round_id: int | None = None,
+    metadata: dict | None = None,
+) -> list[dict]:
     """Convert CKA matrices to tidy CSV rows."""
 
+    metadata = metadata or {}
     rows = []
     for layer, matrix in cka_result["matrices"].items():
         average = cka_result["average_cka"][layer]
@@ -194,6 +199,7 @@ def cka_to_rows(cka_result: dict, round_id: int | None = None) -> list[dict]:
                 }
                 if round_id is not None:
                     row = {"round": round_id, **row}
+                row = {**metadata, **row}
                 rows.append(row)
     return rows
 

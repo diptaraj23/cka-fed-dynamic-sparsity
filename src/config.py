@@ -25,6 +25,7 @@ DEFAULT_CONFIG = {
     "log_dir": "results/logs",
     "checkpoint_dir": "results/checkpoints",
     "plot_dir": "results/plots",
+    "split_dir": None,
     "reference_size": 200,
     "eval_interval": 1,
     "save_checkpoint": False,

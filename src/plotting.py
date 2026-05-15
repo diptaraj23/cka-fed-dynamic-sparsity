@@ -92,6 +92,7 @@ def generate_all_plots(
         print(f"Warning: no training CSV logs found in {log_dir}.")
         return []
 
+    warn_if_mixed_suite_logs(logs, log_dir)
     latest_logs = latest_by_run_identity(logs)
     pairwise_cka = load_pairwise_cka_logs(log_dir)
 
@@ -214,6 +215,31 @@ def load_pairwise_cka_logs(log_dir: Path) -> pd.DataFrame:
     if not frames:
         return pd.DataFrame()
     return pd.concat(frames, ignore_index=True, sort=False)
+
+
+def warn_if_mixed_suite_logs(logs: pd.DataFrame, log_dir: Path) -> None:
+    """Warn when plotting a folder that mixes older flat logs and suite logs."""
+
+    if logs.empty or "source_path" not in logs.columns:
+        return
+
+    log_dir = Path(log_dir)
+    source_paths = [Path(path) for path in logs["source_path"].dropna().unique()]
+    suite_markers = {"multiseed", "cka_strength_sweep"}
+    found_suites = {
+        part
+        for path in source_paths
+        for part in path.parts
+        if part in suite_markers
+    }
+    has_flat_logs = any(path.parent == log_dir for path in source_paths)
+
+    if len(found_suites) > 1 or (found_suites and has_flat_logs):
+        print(
+            "Warning: this log directory mixes multiple experiment suites and/or "
+            "older flat logs. For paper figures, prefer plotting one suite folder "
+            "at a time with --log_dir results/logs/<suite>/<suite_id>."
+        )
 
 
 def latest_by_method_sparsity(logs: pd.DataFrame) -> pd.DataFrame:

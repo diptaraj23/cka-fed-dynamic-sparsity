@@ -37,6 +37,7 @@ class FederatedConfig:
     lr: float = 0.01
     seed: int = 0
     device: str = "auto"
+    eval_interval: int = 1
 
 
 def train_client(
@@ -193,6 +194,7 @@ def run_fedavg(
     reference_loader=None,
     cka_log_path=None,
     cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
+    run_metadata: dict | None = None,
 ):
     """Run standard FedAvg and return one metrics dictionary per round."""
 
@@ -219,22 +221,29 @@ def run_fedavg(
             avg_train_loss = round_result
             cka_result = None
 
-        metrics = evaluate_model(global_model, test_loader, device=device)
+        metrics, evaluated = _evaluate_if_needed(
+            global_model,
+            test_loader,
+            device,
+            config,
+            round_id,
+        )
         row = {
             "round": round_id,
             "test_accuracy": metrics["accuracy"],
             "test_loss": metrics["loss"],
+            "evaluated": evaluated,
             "avg_train_loss": avg_train_loss,
         }
         _add_cka_average_columns(row, cka_result)
         logs.append(row)
-        _extend_cka_rows(cka_rows, cka_result, round_id)
+        _extend_cka_rows(cka_rows, cka_result, round_id, run_metadata)
 
         print(
             f"Round {round_id:03d} | "
             f"train_loss={avg_train_loss:.4f} | "
-            f"test_loss={metrics['loss']:.4f} | "
-            f"test_acc={metrics['accuracy']:.4f}"
+            f"test_loss={_format_metric(metrics['loss'])} | "
+            f"test_acc={_format_metric(metrics['accuracy'])}"
         )
 
     _save_cka_rows_if_requested(cka_rows, cka_log_path)
@@ -250,6 +259,7 @@ def run_sparse_fedavg(
     reference_loader=None,
     cka_log_path=None,
     cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
+    run_metadata: dict | None = None,
 ):
     """Run FedAvg with a fixed unstructured sparsity mask."""
 
@@ -291,12 +301,19 @@ def run_sparse_fedavg(
             avg_train_loss = round_result
             cka_result = None
 
-        metrics = evaluate_model(global_model, test_loader, device=device)
+        metrics, evaluated = _evaluate_if_needed(
+            global_model,
+            test_loader,
+            device,
+            config,
+            round_id,
+        )
         summary = sparsity_summary(global_model, masks)
         row = {
             "round": round_id,
             "test_accuracy": metrics["accuracy"],
             "test_loss": metrics["loss"],
+            "evaluated": evaluated,
             "avg_train_loss": avg_train_loss,
             "total_sparsity": summary["total_sparsity"],
             "active_params": summary["active_params"],
@@ -306,13 +323,13 @@ def run_sparse_fedavg(
         row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
         _add_cka_average_columns(row, cka_result)
         logs.append(row)
-        _extend_cka_rows(cka_rows, cka_result, round_id)
+        _extend_cka_rows(cka_rows, cka_result, round_id, run_metadata)
 
         print(
             f"Round {round_id:03d} | "
             f"train_loss={avg_train_loss:.4f} | "
-            f"test_loss={metrics['loss']:.4f} | "
-            f"test_acc={metrics['accuracy']:.4f} | "
+            f"test_loss={_format_metric(metrics['loss'])} | "
+            f"test_acc={_format_metric(metrics['accuracy'])} | "
             f"sparsity={summary['total_sparsity']:.4f}"
         )
 
@@ -330,6 +347,7 @@ def run_feddst(
     reference_loader=None,
     cka_log_path=None,
     cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
+    run_metadata: dict | None = None,
 ):
     """Run a simplified FedDST/RigL-style dynamic sparse baseline."""
 
@@ -391,12 +409,19 @@ def run_feddst(
         else:
             avg_train_loss = round_result
 
-        metrics = evaluate_model(global_model, test_loader, device=device)
+        metrics, evaluated = _evaluate_if_needed(
+            global_model,
+            test_loader,
+            device,
+            config,
+            round_id,
+        )
         summary = sparsity_summary(global_model, masks)
         row = {
             "round": round_id,
             "test_accuracy": metrics["accuracy"],
             "test_loss": metrics["loss"],
+            "evaluated": evaluated,
             "avg_train_loss": avg_train_loss,
             "pruned_weights": update_stats["pruned"],
             "regrown_weights": update_stats["regrown"],
@@ -409,13 +434,13 @@ def run_feddst(
         row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
         _add_cka_average_columns(row, cka_result)
         logs.append(row)
-        _extend_cka_rows(cka_rows, cka_result, round_id)
+        _extend_cka_rows(cka_rows, cka_result, round_id, run_metadata)
 
         print(
             f"Round {round_id:03d} | "
             f"train_loss={avg_train_loss:.4f} | "
-            f"test_loss={metrics['loss']:.4f} | "
-            f"test_acc={metrics['accuracy']:.4f} | "
+            f"test_loss={_format_metric(metrics['loss'])} | "
+            f"test_acc={_format_metric(metrics['accuracy'])} | "
             f"sparsity={summary['total_sparsity']:.4f} | "
             f"pruned={update_stats['pruned']} | "
             f"regrown={update_stats['regrown']} | "
@@ -440,6 +465,7 @@ def run_cka_feddst(
     cka_min_sparsity: float = 0.0,
     cka_max_sparsity: float = 0.99,
     cka_log_path=None,
+    run_metadata: dict | None = None,
 ):
     """Run CKA-guided FedDST with adaptive layer-wise sparsity targets."""
 
@@ -512,7 +538,7 @@ def run_cka_feddst(
                 min_sparsity=cka_min_sparsity,
                 max_sparsity=cka_max_sparsity,
             )
-            _extend_cka_rows(cka_rows, cka_result, round_id)
+            _extend_cka_rows(cka_rows, cka_result, round_id, run_metadata)
 
         update_stats = _empty_dst_stats(global_model, masks)
         if should_update_mask:
@@ -527,12 +553,19 @@ def run_cka_feddst(
                 guided_dst_config,
             )
 
-        metrics = evaluate_model(global_model, test_loader, device=device)
+        metrics, evaluated = _evaluate_if_needed(
+            global_model,
+            test_loader,
+            device,
+            config,
+            round_id,
+        )
         summary = sparsity_summary(global_model, masks)
         row = {
             "round": round_id,
             "test_accuracy": metrics["accuracy"],
             "test_loss": metrics["loss"],
+            "evaluated": evaluated,
             "avg_train_loss": avg_train_loss,
             "cka_computed": int(should_compute_cka),
             "pruned_weights": update_stats["pruned"],
@@ -559,8 +592,8 @@ def run_cka_feddst(
         print(
             f"Round {round_id:03d} | "
             f"train_loss={avg_train_loss:.4f} | "
-            f"test_loss={metrics['loss']:.4f} | "
-            f"test_acc={metrics['accuracy']:.4f} | "
+            f"test_loss={_format_metric(metrics['loss'])} | "
+            f"test_acc={_format_metric(metrics['accuracy'])} | "
             f"sparsity={summary['total_sparsity']:.4f} | "
             f"cka={int(should_compute_cka)} | "
             f"targets={format_layer_sparsity(layer_targets)}"
@@ -578,6 +611,21 @@ def _resolve_device(device_name: str):
     return torch.device(device_name)
 
 
+def _evaluate_if_needed(global_model, test_loader, device, config, round_id: int):
+    """Evaluate on scheduled rounds and keep skipped rows explicit in CSV logs."""
+
+    should_evaluate = round_id == config.rounds or round_id % config.eval_interval == 0
+    if should_evaluate:
+        return evaluate_model(global_model, test_loader, device=device), 1
+    return {"accuracy": None, "loss": None}, 0
+
+
+def _format_metric(value) -> str:
+    """Format optional evaluation metrics for compact terminal output."""
+
+    return "NA" if value is None else f"{value:.4f}"
+
+
 def _validate_config(config: FederatedConfig, client_loaders) -> None:
     """Validate FedAvg settings before training starts."""
 
@@ -589,6 +637,8 @@ def _validate_config(config: FederatedConfig, client_loaders) -> None:
         raise ValueError("local_epochs must be positive.")
     if config.lr <= 0:
         raise ValueError("lr must be positive.")
+    if config.eval_interval <= 0:
+        raise ValueError("eval_interval must be positive.")
     if len(client_loaders) != config.num_clients:
         raise ValueError(
             f"Expected {config.num_clients} client loaders, got {len(client_loaders)}."
@@ -650,11 +700,18 @@ def _extend_cka_rows(
     rows: list[dict],
     cka_result: dict | None,
     round_id: int,
+    run_metadata: dict | None = None,
 ) -> None:
     """Append pairwise CKA matrix rows for a round."""
 
     if cka_result is not None:
-        rows.extend(cka_to_rows(cka_result, round_id=round_id))
+        rows.extend(
+            cka_to_rows(
+                cka_result,
+                round_id=round_id,
+                metadata=run_metadata,
+            )
+        )
 
 
 def _save_cka_rows_if_requested(rows: list[dict], cka_log_path) -> None:

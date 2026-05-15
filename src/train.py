@@ -16,7 +16,7 @@ from src.config import (
     merge_configs,
     save_config,
 )
-from src.data import DataConfig, load_mnist
+from src.data import DataConfig, load_mnist, make_split_manifest_path
 from src.dst import DSTConfig
 from src.federated import (
     FederatedConfig,
@@ -74,6 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--log-dir", type=Path, default=None)
     parser.add_argument("--checkpoint-dir", type=Path, default=None)
     parser.add_argument("--plot-dir", type=Path, default=None)
+    parser.add_argument("--split-dir", type=Path, default=None)
     parser.add_argument("--reference-size", type=int, default=None)
     parser.add_argument("--eval-interval", type=int, default=None)
     parser.add_argument(
@@ -186,6 +187,7 @@ def _paths_for_run_name(
 
 def make_data_config(config: dict) -> DataConfig:
     """Build the data configuration from the merged experiment config."""
+    split_dir = config.get("split_dir")
     return DataConfig(
         data_dir=Path(config["data_dir"]),
         num_clients=int(config["num_clients"]),
@@ -194,6 +196,7 @@ def make_data_config(config: dict) -> DataConfig:
         seed=int(config["seed"]),
         reference_size=int(config["reference_size"]),
         num_workers=int(config["num_workers"]),
+        split_dir=Path(split_dir) if split_dir else None,
     )
 
 
@@ -206,6 +209,7 @@ def make_federated_config(config: dict) -> FederatedConfig:
         lr=float(config["lr"]),
         seed=int(config["seed"]),
         device=str(config["device"]),
+        eval_interval=int(config["eval_interval"]),
     )
 
 
@@ -242,6 +246,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
     should_log_cka = _should_write_cka_log(config)
     cka_log_path = paths["cka_log"] if should_log_cka else None
     optional_reference_loader = reference_loader if should_log_cka else None
+    run_metadata = base_log_metadata(config)
 
     if method == "fedavg":
         history = run_fedavg(
@@ -252,6 +257,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
             reference_loader=optional_reference_loader,
             cka_log_path=cka_log_path,
             cka_layers=cka_layers,
+            run_metadata=run_metadata,
         )
     elif method == "sparse_fedavg":
         history = run_sparse_fedavg(
@@ -263,6 +269,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
             reference_loader=optional_reference_loader,
             cka_log_path=cka_log_path,
             cka_layers=cka_layers,
+            run_metadata=run_metadata,
         )
     elif method == "feddst":
         history = run_feddst(
@@ -275,6 +282,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
             reference_loader=optional_reference_loader,
             cka_log_path=cka_log_path,
             cka_layers=cka_layers,
+            run_metadata=run_metadata,
         )
     elif method == "cka_feddst":
         history = run_cka_feddst(
@@ -291,6 +299,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
             cka_min_sparsity=float(config["cka_min_sparsity"]),
             cka_max_sparsity=float(config["cka_max_sparsity"]),
             cka_log_path=cka_log_path,
+            run_metadata=run_metadata,
         )
     else:
         raise ValueError(f"Unknown method: {method}")
@@ -305,19 +314,30 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
 def add_log_metadata(history: list[dict], config: dict) -> list[dict]:
     """Add run-level metadata to every training log row."""
 
-    sparsity = 0.0 if str(config["method"]) == "fedavg" else config.get("sparsity", 0.0)
-    metadata = {
+    metadata = base_log_metadata(config)
+    return [{**metadata, **row} for row in history]
+
+
+def base_log_metadata(config: dict) -> dict:
+    """Return run-level metadata shared by training and CKA logs."""
+
+    sparsity = (
+        0.0
+        if str(config["method"]) == "fedavg"
+        else config.get("sparsity", 0.0)
+    )
+    return {
         "method": str(config["method"]),
         "dataset": str(config["dataset"]),
         "sparsity": float(sparsity),
         "seed": int(config["seed"]),
+        "split_manifest_path": str(config.get("split_manifest_path", "")),
         "cka_strength": (
             float(config["cka_strength"])
             if str(config["method"]) == "cka_feddst"
             else ""
         ),
     }
-    return [{**metadata, **row} for row in history]
 
 
 def _should_write_cka_log(config: dict) -> bool:
@@ -340,6 +360,15 @@ def main() -> None:
         return
 
     paths = prepare_output_paths(config)
+    split_dir = (
+        Path(config["split_dir"])
+        if config.get("split_dir")
+        else paths["log"].parent / "splits"
+    )
+    config["split_dir"] = str(split_dir)
+    config["split_manifest_path"] = str(
+        make_split_manifest_path(make_data_config(config))
+    )
     save_config(config, paths["config"])
     print(f"Saved merged config to: {paths['config']}")
 
