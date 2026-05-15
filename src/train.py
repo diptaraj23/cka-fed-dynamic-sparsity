@@ -132,6 +132,8 @@ def make_run_name(config: dict) -> str:
     ]
     if str(config["method"]) != "fedavg":
         parts.append(f"sparsity{config.get('sparsity', 0.0)}")
+    if str(config["method"]) == "cka_feddst":
+        parts.append(f"cka{config.get('cka_strength', 'NA')}")
     parts.extend(
         [
             f"seed{config['seed']}",
@@ -309,6 +311,11 @@ def add_log_metadata(history: list[dict], config: dict) -> list[dict]:
         "dataset": str(config["dataset"]),
         "sparsity": float(sparsity),
         "seed": int(config["seed"]),
+        "cka_strength": (
+            float(config["cka_strength"])
+            if str(config["method"]) == "cka_feddst"
+            else ""
+        ),
     }
     return [{**metadata, **row} for row in history]
 

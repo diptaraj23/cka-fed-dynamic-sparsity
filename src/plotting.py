@@ -62,6 +62,23 @@ COMMUNICATION_COLUMNS = (
     "active_params",
 )
 SPARSITY_PATTERN = re.compile(r"sparsity(?P<value>\d+(?:[p.]\d+)?)")
+SEED_PATTERN = re.compile(r"(?:^|_)seed(?P<value>\d+)(?:_|\.|$)")
+CKA_STRENGTH_PATTERN = re.compile(r"(?:^|_)cka(?P<value>\d+(?:[p.]\d+)?)(?:_|\.|$)")
+CKA_STRENGTH_DIR_PATTERN = re.compile(r"strength_(?P<value>\d+(?:[p.]\d+)?)")
+CKA_STRENGTH_COLORS = {
+    0.2: "#333333",
+    0.5: "#4C78A8",
+    0.8: "#F58518",
+    0.9: "#54A24B",
+    1.0: "#B279A2",
+}
+CKA_STRENGTH_MARKERS = {
+    0.2: "o",
+    0.5: "s",
+    0.8: "^",
+    0.9: "D",
+    1.0: "X",
+}
 
 
 def generate_all_plots(
@@ -75,7 +92,7 @@ def generate_all_plots(
         print(f"Warning: no training CSV logs found in {log_dir}.")
         return []
 
-    latest_logs = latest_by_method_sparsity(logs)
+    latest_logs = latest_by_run_identity(logs)
     pairwise_cka = load_pairwise_cka_logs(log_dir)
 
     plot_dir.mkdir(parents=True, exist_ok=True)
@@ -84,6 +101,12 @@ def generate_all_plots(
         plot_accuracy_vs_rounds,
         plot_final_accuracy_vs_sparsity,
         plot_best_accuracy_vs_sparsity,
+        plot_accuracy_vs_rounds_mean_std,
+        plot_final_accuracy_mean_std_vs_sparsity,
+        plot_best_accuracy_mean_std_vs_sparsity,
+        plot_cka_strength_accuracy_vs_rounds,
+        plot_cka_strength_final_accuracy_vs_sparsity,
+        plot_cka_strength_best_accuracy_vs_sparsity,
         plot_accuracy_vs_communication_cost,
         plot_cka_feddst_layerwise_sparsity,
     ]
@@ -104,7 +127,9 @@ def load_training_logs(log_dir: Path) -> pd.DataFrame:
     """Read all non-CKA-matrix training CSV logs."""
 
     frames = []
-    for path in sorted(log_dir.glob("*.csv")):
+    for path in sorted(log_dir.rglob("*.csv")):
+        if path.name == "manifest.csv" or path.name.endswith("_cka.csv"):
+            continue
         try:
             frame = pd.read_csv(path)
         except Exception as exc:
@@ -129,7 +154,10 @@ def load_training_logs(log_dir: Path) -> pd.DataFrame:
         frame["method"] = method
         frame["dataset"] = infer_dataset(frame, path)
         frame["sparsity"] = infer_sparsity(frame, path, method)
+        frame["seed"] = infer_seed(frame, path)
+        frame["cka_strength"] = infer_cka_strength(frame, path, method)
         frame["source_file"] = path.name
+        frame["source_path"] = str(path)
         frame["source_mtime"] = path.stat().st_mtime
         numeric_columns = [
             "round",
@@ -137,6 +165,7 @@ def load_training_logs(log_dir: Path) -> pd.DataFrame:
             "test_loss",
             "sparsity",
             "seed",
+            "cka_strength",
             "total_sparsity",
             "active_params",
             "communication_cost",
@@ -154,7 +183,7 @@ def load_pairwise_cka_logs(log_dir: Path) -> pd.DataFrame:
     """Read pairwise CKA matrix logs when available."""
 
     frames = []
-    for path in sorted(log_dir.glob("*_cka.csv")):
+    for path in sorted(log_dir.rglob("*_cka.csv")):
         try:
             frame = pd.read_csv(path)
         except Exception as exc:
@@ -171,11 +200,14 @@ def load_pairwise_cka_logs(log_dir: Path) -> pd.DataFrame:
         frame = frame.copy()
         frame["method"] = method
         frame["sparsity"] = infer_sparsity(frame, path, method)
+        frame["seed"] = infer_seed(frame, path)
+        frame["cka_strength"] = infer_cka_strength(frame, path, method)
         frame["source_file"] = path.name
+        frame["source_path"] = str(path)
         frame["source_mtime"] = path.stat().st_mtime
         frame = coerce_numeric_columns(
             frame,
-            ["round", "cka", "average_layer_cka", "sparsity"],
+            ["round", "cka", "average_layer_cka", "sparsity", "seed", "cka_strength"],
         )
         frames.append(frame)
 
@@ -187,18 +219,28 @@ def load_pairwise_cka_logs(log_dir: Path) -> pd.DataFrame:
 def latest_by_method_sparsity(logs: pd.DataFrame) -> pd.DataFrame:
     """Keep the newest source file for each method/sparsity combination."""
 
+    return latest_by_run_identity(logs)
+
+
+def latest_by_run_identity(logs: pd.DataFrame) -> pd.DataFrame:
+    """Keep newest logs without merging different seeds or CKA strengths."""
+
     if logs.empty:
         return logs
 
-    sources = logs[
-        ["method", "sparsity", "source_file", "source_mtime"]
-    ].drop_duplicates()
+    source_col = source_column(logs)
+    keys = [
+        column
+        for column in ("method", "sparsity", "seed", "cka_strength")
+        if column in logs.columns
+    ]
+    sources = logs[keys + [source_col, "source_mtime"]].drop_duplicates()
     sources = sources.sort_values("source_mtime")
     latest_sources = sources.drop_duplicates(
-        subset=["method", "sparsity"],
+        subset=keys,
         keep="last",
-    )["source_file"]
-    return logs[logs["source_file"].isin(set(latest_sources))].copy()
+    )[source_col]
+    return logs[logs[source_col].isin(set(latest_sources))].copy()
 
 
 def plot_accuracy_vs_rounds(logs: pd.DataFrame, plot_dir: Path) -> Path | None:
@@ -232,24 +274,22 @@ def plot_final_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path 
         print("Warning: cannot plot final accuracy vs sparsity; no sparse logs.")
         return None
 
-    finals = final_rows(sparse_logs)
+    finals = aggregate_metric(
+        final_rows(sparse_logs),
+        ["method", "sparsity", "cka_strength"],
+        "test_accuracy",
+    )
+    if finals.empty:
+        print("Warning: no sparse method data found for final accuracy plot.")
+        return None
+
     fig, ax = plt.subplots(figsize=(8, 5))
-    plotted = False
-    add_dense_reference_line(ax, final_rows(logs), "FedAvg dense baseline")
-    for method in SPARSE_METHODS:
-        method_rows = finals[finals["method"] == method].sort_values("sparsity")
-        if method_rows.empty:
-            continue
-        ax.plot(
-            method_rows["sparsity"],
-            method_rows["test_accuracy"],
-            color=method_color(method),
-            marker=METHOD_MARKERS.get(method, "o"),
-            linewidth=2.4,
-            markersize=7,
-            label=METHOD_LABELS[method],
-        )
-        plotted = True
+    add_dense_mean_reference(ax, final_rows(logs), "FedAvg dense baseline")
+    plotted = plot_accuracy_summary_by_sparsity(
+        ax,
+        finals,
+        include_cka_strength=has_multiple_cka_strengths(finals),
+    )
 
     if not plotted:
         print("Warning: no sparse method data found for final accuracy plot.")
@@ -274,24 +314,22 @@ def plot_best_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path |
         print("Warning: cannot plot best accuracy vs sparsity; no sparse logs.")
         return None
 
-    best = best_rows(sparse_logs)
+    best = aggregate_metric(
+        best_rows(sparse_logs),
+        ["method", "sparsity", "cka_strength"],
+        "test_accuracy",
+    )
+    if best.empty:
+        print("Warning: no sparse method data found for best accuracy plot.")
+        return None
+
     fig, ax = plt.subplots(figsize=(8, 5))
-    plotted = False
-    add_dense_reference_line(ax, best_rows(logs), "FedAvg dense best")
-    for method in SPARSE_METHODS:
-        method_rows = best[best["method"] == method].sort_values("sparsity")
-        if method_rows.empty:
-            continue
-        ax.plot(
-            method_rows["sparsity"],
-            method_rows["test_accuracy"],
-            color=method_color(method),
-            marker=METHOD_MARKERS.get(method, "o"),
-            linewidth=2.4,
-            markersize=7,
-            label=METHOD_LABELS[method],
-        )
-        plotted = True
+    add_dense_mean_reference(ax, best_rows(logs), "FedAvg dense best")
+    plotted = plot_accuracy_summary_by_sparsity(
+        ax,
+        best,
+        include_cka_strength=has_multiple_cka_strengths(best),
+    )
 
     if not plotted:
         print("Warning: no sparse method data found for best accuracy plot.")
@@ -306,6 +344,232 @@ def plot_best_accuracy_vs_sparsity(logs: pd.DataFrame, plot_dir: Path) -> Path |
     )
     ax.legend(title="Method", fontsize=8)
     return save_figure(fig, plot_dir / "best_accuracy_vs_sparsity.png")
+
+
+def plot_accuracy_vs_rounds_mean_std(
+    logs: pd.DataFrame,
+    plot_dir: Path,
+) -> Path | None:
+    """Plot mean accuracy with standard-deviation bands across seeds."""
+
+    if logs.empty or "test_accuracy" not in logs.columns:
+        return None
+
+    rows = logs.dropna(subset=["round", "test_accuracy"]).copy()
+    if rows.empty:
+        return None
+
+    group_cols = ["method", "sparsity", "cka_strength", "round"]
+    aggregate = aggregate_metric(rows, group_cols, "test_accuracy")
+    if aggregate.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    include_cka = has_multiple_cka_strengths(aggregate)
+    for (method, sparsity, cka_strength), group in aggregate.groupby(
+        ["method", "sparsity", "cka_strength"],
+        dropna=False,
+        sort=False,
+    ):
+        group = group.sort_values("round")
+        style = sparsity_style(sparsity)
+        color = method_color(method)
+        ax.plot(
+            group["round"],
+            group["mean"],
+            color=color,
+            marker=style["marker"],
+            linestyle=style["linestyle"],
+            linewidth=2,
+            markersize=5,
+            label=aggregate_method_label(method, sparsity, cka_strength, include_cka),
+        )
+        if group["count"].max() > 1:
+            mean = group["mean"].astype(float)
+            std = group["std"].fillna(0.0).astype(float)
+            ax.fill_between(
+                group["round"].astype(float),
+                mean - std,
+                mean + std,
+                color=color,
+                alpha=0.12,
+                linewidth=0,
+            )
+
+    style_axes(
+        ax,
+        "Mean Test Accuracy vs Communication Rounds",
+        "Communication Round",
+        "Mean Test Accuracy",
+    )
+    return save_figure(fig, plot_dir / "accuracy_vs_rounds_mean_std.png")
+
+
+def plot_final_accuracy_mean_std_vs_sparsity(
+    logs: pd.DataFrame,
+    plot_dir: Path,
+) -> Path | None:
+    """Plot final accuracy mean/std across seeds for sparse methods."""
+
+    sparse_logs = sparse_only(logs)
+    if sparse_logs.empty:
+        return None
+
+    finals = final_rows(sparse_logs)
+    aggregate = aggregate_metric(
+        finals,
+        ["method", "sparsity", "cka_strength"],
+        "test_accuracy",
+    )
+    if aggregate.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.5))
+    add_dense_mean_reference(ax, final_rows(logs), "FedAvg dense mean")
+    include_cka = has_multiple_cka_strengths(aggregate)
+    plotted = plot_accuracy_summary_by_sparsity(ax, aggregate, include_cka)
+    if not plotted:
+        plt.close(fig)
+        return None
+
+    style_axes(
+        ax,
+        "Final Accuracy Mean/Std vs Sparsity",
+        "Sparsity",
+        "Final Test Accuracy",
+    )
+    ax.legend(title="Method", fontsize=8)
+    return save_figure(fig, plot_dir / "final_accuracy_mean_std_vs_sparsity.png")
+
+
+def plot_best_accuracy_mean_std_vs_sparsity(
+    logs: pd.DataFrame,
+    plot_dir: Path,
+) -> Path | None:
+    """Plot best accuracy mean/std across seeds for sparse methods."""
+
+    sparse_logs = sparse_only(logs)
+    if sparse_logs.empty:
+        return None
+
+    best = best_rows(sparse_logs)
+    aggregate = aggregate_metric(
+        best,
+        ["method", "sparsity", "cka_strength"],
+        "test_accuracy",
+    )
+    if aggregate.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.5))
+    add_dense_mean_reference(ax, best_rows(logs), "FedAvg dense best mean")
+    include_cka = has_multiple_cka_strengths(aggregate)
+    plotted = plot_accuracy_summary_by_sparsity(ax, aggregate, include_cka)
+    if not plotted:
+        plt.close(fig)
+        return None
+
+    style_axes(
+        ax,
+        "Best Accuracy Mean/Std vs Sparsity",
+        "Sparsity",
+        "Best Test Accuracy",
+    )
+    ax.legend(title="Method", fontsize=8)
+    return save_figure(fig, plot_dir / "best_accuracy_mean_std_vs_sparsity.png")
+
+
+def plot_cka_strength_accuracy_vs_rounds(
+    logs: pd.DataFrame,
+    plot_dir: Path,
+) -> Path | None:
+    """Plot CKA-FedDST accuracy by CKA strength and sparsity."""
+
+    cka_logs = cka_strength_logs(logs)
+    if cka_logs.empty or len(unique_cka_strengths(cka_logs)) < 2:
+        return None
+
+    aggregate = aggregate_metric(
+        cka_logs.dropna(subset=["round", "test_accuracy"]),
+        ["cka_strength", "sparsity", "round"],
+        "test_accuracy",
+    )
+    if aggregate.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    for (strength, sparsity), group in aggregate.groupby(
+        ["cka_strength", "sparsity"],
+        sort=False,
+    ):
+        group = group.sort_values("round")
+        style = sparsity_style(sparsity)
+        color = cka_strength_color(strength)
+        ax.plot(
+            group["round"],
+            group["mean"],
+            color=color,
+            marker=style["marker"],
+            linestyle=style["linestyle"],
+            linewidth=2,
+            markersize=5,
+            label="_nolegend_",
+        )
+        if group["count"].max() > 1:
+            mean = group["mean"].astype(float)
+            std = group["std"].fillna(0.0).astype(float)
+            ax.fill_between(
+                group["round"].astype(float),
+                mean - std,
+                mean + std,
+                color=color,
+                alpha=0.10,
+                linewidth=0,
+            )
+
+    style_axes(
+        ax,
+        "CKA-FedDST Accuracy by CKA Strength",
+        "Communication Round",
+        "Mean Test Accuracy",
+        show_legend=False,
+    )
+    add_cka_strength_sparsity_legends(ax, cka_logs)
+    return save_figure(fig, plot_dir / "cka_strength_accuracy_vs_rounds.png")
+
+
+def plot_cka_strength_final_accuracy_vs_sparsity(
+    logs: pd.DataFrame,
+    plot_dir: Path,
+) -> Path | None:
+    """Plot final CKA-FedDST accuracy by CKA strength."""
+
+    cka_logs = cka_strength_logs(logs)
+    if cka_logs.empty or len(unique_cka_strengths(cka_logs)) < 2:
+        return None
+    return plot_cka_strength_summary(
+        final_rows(cka_logs),
+        plot_dir / "cka_strength_final_accuracy_vs_sparsity.png",
+        "CKA Strength Final Accuracy vs Sparsity",
+        "Final Test Accuracy",
+    )
+
+
+def plot_cka_strength_best_accuracy_vs_sparsity(
+    logs: pd.DataFrame,
+    plot_dir: Path,
+) -> Path | None:
+    """Plot best CKA-FedDST accuracy by CKA strength."""
+
+    cka_logs = cka_strength_logs(logs)
+    if cka_logs.empty or len(unique_cka_strengths(cka_logs)) < 2:
+        return None
+    return plot_cka_strength_summary(
+        best_rows(cka_logs),
+        plot_dir / "cka_strength_best_accuracy_vs_sparsity.png",
+        "CKA Strength Best Accuracy vs Sparsity",
+        "Best Test Accuracy",
+    )
 
 
 def plot_accuracy_vs_communication_cost(
@@ -477,6 +741,271 @@ def plot_cka_feddst_layerwise_cka(
     return save_figure(fig, plot_dir / "cka_feddst_layerwise_cka.png")
 
 
+def aggregate_metric(
+    rows: pd.DataFrame,
+    group_cols: list[str],
+    value_col: str,
+) -> pd.DataFrame:
+    """Aggregate a metric by mean/std/count while preserving NaN groups."""
+
+    if rows.empty or value_col not in rows.columns:
+        return pd.DataFrame()
+    usable = rows.dropna(subset=[value_col]).copy()
+    if usable.empty:
+        return pd.DataFrame()
+    return (
+        usable.groupby(group_cols, dropna=False)[value_col]
+        .agg(mean="mean", std="std", count="count")
+        .reset_index()
+    )
+
+
+def plot_accuracy_summary_by_sparsity(
+    ax,
+    aggregate: pd.DataFrame,
+    include_cka_strength: bool = False,
+) -> bool:
+    """Plot summary mean/std accuracy curves over sparsity."""
+
+    plotted = False
+    group_cols = ["method", "cka_strength"]
+    for (method, cka_strength), group in aggregate.groupby(
+        group_cols,
+        dropna=False,
+        sort=False,
+    ):
+        if method not in SPARSE_METHODS:
+            continue
+        group = group.sort_values("sparsity")
+        color = (
+            cka_strength_color(cka_strength)
+            if method == "cka_feddst" and include_cka_strength
+            else method_color(method)
+        )
+        marker = (
+            cka_strength_marker(cka_strength)
+            if method == "cka_feddst" and include_cka_strength
+            else METHOD_MARKERS.get(method, "o")
+        )
+        ax.errorbar(
+            group["sparsity"],
+            group["mean"],
+            yerr=group["std"].fillna(0.0),
+            color=color,
+            marker=marker,
+            linewidth=2.2,
+            markersize=6,
+            capsize=3,
+            label=aggregate_method_name(method, cka_strength, include_cka_strength),
+        )
+        plotted = True
+    return plotted
+
+
+def plot_cka_strength_summary(
+    rows: pd.DataFrame,
+    output_path: Path,
+    title: str,
+    ylabel: str,
+) -> Path | None:
+    """Plot a CKA-strength accuracy summary over sparsity."""
+
+    aggregate = aggregate_metric(
+        rows,
+        ["cka_strength", "sparsity"],
+        "test_accuracy",
+    )
+    if aggregate.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.5))
+    for strength, group in aggregate.groupby("cka_strength", sort=True):
+        group = group.sort_values("sparsity")
+        ax.errorbar(
+            group["sparsity"],
+            group["mean"],
+            yerr=group["std"].fillna(0.0),
+            color=cka_strength_color(strength),
+            marker=cka_strength_marker(strength),
+            linewidth=2.2,
+            markersize=6,
+            capsize=3,
+            label=f"cka_strength={format_sparsity(strength)}",
+        )
+
+    style_axes(ax, title, "Sparsity", ylabel)
+    ax.legend(title="CKA strength", fontsize=8)
+    return save_figure(fig, output_path)
+
+
+def add_dense_mean_reference(
+    ax,
+    rows: pd.DataFrame,
+    label: str,
+) -> None:
+    """Draw mean FedAvg accuracy as a dense reference line."""
+
+    if rows.empty or "test_accuracy" not in rows.columns:
+        return
+    fedavg = rows[rows["method"] == "fedavg"]
+    values = pd.to_numeric(fedavg["test_accuracy"], errors="coerce").dropna()
+    if values.empty:
+        return
+    mean = values.mean()
+    std = values.std()
+    ax.axhline(
+        mean,
+        color=method_color("fedavg"),
+        linestyle="--",
+        linewidth=2,
+        label=label,
+    )
+    if len(values) > 1 and not pd.isna(std):
+        ax.axhspan(
+            mean - std,
+            mean + std,
+            color=method_color("fedavg"),
+            alpha=0.08,
+        )
+
+
+def cka_strength_logs(logs: pd.DataFrame) -> pd.DataFrame:
+    """Return CKA-FedDST logs with numeric CKA-strength values."""
+
+    if logs.empty or "cka_strength" not in logs.columns:
+        return pd.DataFrame()
+    rows = logs[logs["method"] == "cka_feddst"].copy()
+    rows["cka_strength"] = pd.to_numeric(rows["cka_strength"], errors="coerce")
+    return rows.dropna(subset=["cka_strength"])
+
+
+def unique_cka_strengths(logs: pd.DataFrame) -> list[float]:
+    """Return sorted CKA-strength values."""
+
+    if logs.empty or "cka_strength" not in logs.columns:
+        return []
+    values = pd.to_numeric(logs["cka_strength"], errors="coerce").dropna()
+    return sorted({round(float(value), 4) for value in values})
+
+
+def has_multiple_cka_strengths(logs: pd.DataFrame) -> bool:
+    """Return true when logs include multiple CKA-strength settings."""
+
+    return len(unique_cka_strengths(logs)) > 1
+
+
+def aggregate_method_label(
+    method: str,
+    sparsity,
+    cka_strength,
+    include_cka_strength: bool = False,
+) -> str:
+    """Return a label for mean/std round curves."""
+
+    label = method_sparsity_label_from_values(method, sparsity)
+    if method == "cka_feddst" and include_cka_strength and not pd.isna(cka_strength):
+        label = f"{label} cka={format_sparsity(cka_strength)}"
+    return label
+
+
+def aggregate_method_name(
+    method: str,
+    cka_strength,
+    include_cka_strength: bool = False,
+) -> str:
+    """Return a summary-plot method label."""
+
+    label = METHOD_LABELS.get(method, method)
+    if method == "cka_feddst" and include_cka_strength and not pd.isna(cka_strength):
+        label = f"{label} cka={format_sparsity(cka_strength)}"
+    return label
+
+
+def method_sparsity_label_from_values(method: str, sparsity) -> str:
+    """Return method/sparsity label from scalar values."""
+
+    label = METHOD_LABELS.get(method, method)
+    if method == "fedavg":
+        return f"{label} dense"
+    return f"{label} s={format_sparsity(sparsity)}"
+
+
+def cka_strength_color(value) -> str:
+    """Return the color assigned to a CKA-strength value."""
+
+    key = strength_key(value)
+    return CKA_STRENGTH_COLORS.get(key, "#777777")
+
+
+def cka_strength_marker(value) -> str:
+    """Return the marker assigned to a CKA-strength value."""
+
+    key = strength_key(value)
+    return CKA_STRENGTH_MARKERS.get(key, "o")
+
+
+def strength_key(value) -> float:
+    """Normalize CKA-strength values for style lookups."""
+
+    if pd.isna(value):
+        return float("nan")
+    value = float(value)
+    known = sorted(CKA_STRENGTH_COLORS)
+    nearest = min(known, key=lambda candidate: abs(candidate - value))
+    if abs(nearest - value) < 1e-6:
+        return nearest
+    return round(value, 4)
+
+
+def add_cka_strength_sparsity_legends(ax, logs: pd.DataFrame) -> None:
+    """Add separate legends for CKA strength and sparsity."""
+
+    strength_handles = [
+        Line2D(
+            [0],
+            [0],
+            color=cka_strength_color(value),
+            marker=cka_strength_marker(value),
+            linestyle="-",
+            linewidth=2,
+            markersize=6,
+            label=f"cka={format_sparsity(value)}",
+        )
+        for value in unique_cka_strengths(logs)
+    ]
+    sparsity_handles = [
+        Line2D(
+            [0],
+            [0],
+            color="#333333",
+            marker=sparsity_style(value)["marker"],
+            linestyle=sparsity_style(value)["linestyle"],
+            linewidth=2,
+            markersize=6,
+            label=sparsity_label(value),
+        )
+        for value in unique_sparsities(logs)
+    ]
+
+    if strength_handles:
+        strength_legend = ax.legend(
+            handles=strength_handles,
+            title="CKA strength",
+            loc="upper left",
+            bbox_to_anchor=(1.02, 1.0),
+            fontsize=8,
+        )
+        ax.add_artist(strength_legend)
+    if sparsity_handles:
+        ax.legend(
+            handles=sparsity_handles,
+            title="Sparsity",
+            loc="lower left",
+            bbox_to_anchor=(1.02, 0.0),
+            fontsize=8,
+        )
+
+
 def sparse_only(logs: pd.DataFrame) -> pd.DataFrame:
     """Return logs for sparse methods with numeric sparsity values."""
 
@@ -489,13 +1018,24 @@ def sparse_only(logs: pd.DataFrame) -> pd.DataFrame:
 def sorted_sources(logs: pd.DataFrame):
     """Yield source-file groups in method/sparsity order."""
 
-    source_rows = logs[
-        ["method", "sparsity", "source_file"]
-    ].drop_duplicates()
+    source_col = source_column(logs)
+    columns = [
+        column
+        for column in ("method", "sparsity", "seed", "cka_strength", "source_file")
+        if column in logs.columns
+    ]
+    if source_col not in columns:
+        columns.append(source_col)
+    source_rows = logs[columns].drop_duplicates()
     source_rows["method_order"] = source_rows["method"].map(method_rank)
-    source_rows = source_rows.sort_values(["method_order", "sparsity", "source_file"])
+    sort_columns = [
+        column
+        for column in ("method_order", "sparsity", "cka_strength", "seed", "source_file")
+        if column in source_rows.columns
+    ]
+    source_rows = source_rows.sort_values(sort_columns)
     for _, row in source_rows.iterrows():
-        yield row["source_file"], logs[logs["source_file"] == row["source_file"]]
+        yield row[source_col], logs[logs[source_col] == row[source_col]]
 
 
 def final_rows(logs: pd.DataFrame) -> pd.DataFrame:
@@ -503,9 +1043,10 @@ def final_rows(logs: pd.DataFrame) -> pd.DataFrame:
 
     if logs.empty:
         return logs
+    source_col = source_column(logs)
     return (
-        logs.sort_values(["source_file", "round"])
-        .groupby("source_file", as_index=False)
+        logs.sort_values([source_col, "round"])
+        .groupby(source_col, as_index=False)
         .tail(1)
     )
 
@@ -515,7 +1056,7 @@ def best_rows(logs: pd.DataFrame) -> pd.DataFrame:
 
     if logs.empty:
         return logs
-    idx = logs.groupby("source_file")["test_accuracy"].idxmax()
+    idx = logs.groupby(source_column(logs))["test_accuracy"].idxmax()
     return logs.loc[idx].copy()
 
 
@@ -566,6 +1107,43 @@ def infer_sparsity(frame: pd.DataFrame, path: Path, method: str) -> float:
     return float("nan")
 
 
+def infer_seed(frame: pd.DataFrame, path: Path) -> int | float:
+    """Infer seed from a CSV column first, then from the filename."""
+
+    if "seed" in frame.columns:
+        values = pd.to_numeric(frame["seed"], errors="coerce").dropna()
+        if not values.empty:
+            return int(values.iloc[0])
+
+    match = SEED_PATTERN.search(path.name)
+    if match:
+        return int(match.group("value"))
+
+    return float("nan")
+
+
+def infer_cka_strength(frame: pd.DataFrame, path: Path, method: str) -> float:
+    """Infer CKA strength from a CSV column, filename, or suite folder."""
+
+    if method != "cka_feddst":
+        return float("nan")
+
+    if "cka_strength" in frame.columns:
+        values = pd.to_numeric(frame["cka_strength"], errors="coerce").dropna()
+        if not values.empty:
+            return float(values.iloc[0])
+
+    for text in (path.name, *[part.name for part in path.parents]):
+        match = CKA_STRENGTH_PATTERN.search(text)
+        if match:
+            return float(match.group("value").replace("p", "."))
+        match = CKA_STRENGTH_DIR_PATTERN.search(text)
+        if match:
+            return float(match.group("value").replace("p", "."))
+
+    return float("nan")
+
+
 def is_pairwise_cka_frame(frame: pd.DataFrame) -> bool:
     """Return true for pairwise CKA matrix CSVs."""
 
@@ -579,6 +1157,12 @@ def coerce_numeric_columns(frame: pd.DataFrame, columns: list[str]) -> pd.DataFr
         if column in frame.columns:
             frame[column] = pd.to_numeric(frame[column], errors="coerce")
     return frame
+
+
+def source_column(logs: pd.DataFrame) -> str:
+    """Return the source identity column available in a log frame."""
+
+    return "source_path" if "source_path" in logs.columns else "source_file"
 
 
 def method_sparsity_label(group: pd.DataFrame) -> str:
