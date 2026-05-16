@@ -11,6 +11,10 @@ __pycache__/
 .ruff_cache/
 .ipynb_checkpoints/
 
+#HPC Slurm output
+slurm-*.out
+slurm-*.err
+
 # Local datasets
 data/
 
