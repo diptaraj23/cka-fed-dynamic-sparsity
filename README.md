@@ -173,15 +173,40 @@ Preview a suite without launching training:
 python experiments/run_experiment.py --suite all --dry_run
 ```
 
-Generate plots from saved logs:
+Aggregate raw logs into reusable mean/std CSV files:
+
+```bash
+python experiments/aggregate_results.py
+```
+
+By default, this discovers both completed suite types:
+
+```text
+results/logs/multiseed/<suite_id>/
+results/logs/cka_strength_sweep/<suite_id>/
+```
+
+and writes averaged results to:
+
+```text
+results/averaged/multiseed/<suite_id>/
+results/averaged/cka_strength_sweep/<suite_id>/
+```
+
+Generate final plots from the averaged results:
 
 ```bash
 python experiments/plot_results.py
-python experiments/plot_results.py --log_dir results/logs --plot_dir results/plots
 ```
 
-For final multi-seed analysis, first aggregate raw logs into reusable mean/std
-CSV files:
+By default, this discovers both averaged suite types and writes plots to:
+
+```text
+results/plots/multiseed/<suite_id>/
+results/plots/cka_strength_sweep/<suite_id>/
+```
+
+For a targeted aggregation, pass one suite folder explicitly:
 
 ```bash
 python experiments/aggregate_results.py \
@@ -195,7 +220,7 @@ python experiments/aggregate_results.py \
   --output_dir results/averaged/cka_strength_sweep/<suite_id>
 ```
 
-For suite-specific figures, point the plotting script at one suite folder:
+For targeted figures, point the plotting script at one averaged suite folder:
 
 ```bash
 python experiments/plot_results.py \

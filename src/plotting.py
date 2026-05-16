@@ -87,6 +87,10 @@ AVERAGED_FILES = {
     "layer_cka": "layerwise_cka_mean_std.csv",
     "manifest": "aggregation_manifest.csv",
 }
+SUITE_FOLDERS = {
+    "multiseed": "multiseed",
+    "cka_strength": "cka_strength_sweep",
+}
 
 
 def generate_all_plots(
@@ -170,6 +174,59 @@ def generate_plots_from_averages(
         if path is not None:
             saved_paths.append(path)
     return saved_paths
+
+
+def generate_plots_for_discovered_averages(
+    averaged_root: Path = Path("results/averaged"),
+    plot_root: Path = Path("results/plots"),
+    suite: str = "all",
+) -> list[Path]:
+    """Create plots for all discovered averaged suite folders."""
+
+    tasks = discover_averaged_suite_dirs(averaged_root, suite)
+    if not tasks:
+        print(
+            f"Warning: no averaged result folders found under {averaged_root}. "
+            "Run experiments/aggregate_results.py first."
+        )
+        return []
+
+    saved_paths: list[Path] = []
+    for index, (suite_name, avg_dir) in enumerate(tasks, start=1):
+        plot_dir = Path(plot_root) / suite_folder(suite_name) / avg_dir.name
+        print(
+            f"[Plot {index}/{len(tasks)}] "
+            f"suite={suite_name} avg_dir={avg_dir} plot_dir={plot_dir}"
+        )
+        saved_paths.extend(generate_plots_from_averages(avg_dir, plot_dir))
+    return saved_paths
+
+
+def discover_averaged_suite_dirs(
+    averaged_root: Path,
+    suite: str = "all",
+) -> list[tuple[str, Path]]:
+    """Find averaged suite directories to plot."""
+
+    suites = tuple(SUITE_FOLDERS) if suite == "all" else (suite,)
+    tasks: list[tuple[str, Path]] = []
+    for suite_name in suites:
+        suite_root = Path(averaged_root) / suite_folder(suite_name)
+        if not suite_root.exists():
+            continue
+        for avg_dir in sorted(
+            path
+            for path in suite_root.iterdir()
+            if path.is_dir() and (path / AVERAGED_FILES["round"]).exists()
+        ):
+            tasks.append((suite_name, avg_dir))
+    return tasks
+
+
+def suite_folder(suite: str) -> str:
+    """Return the directory name used for a suite."""
+
+    return SUITE_FOLDERS[suite]
 
 
 def load_averaged_results(avg_dir: Path) -> dict[str, pd.DataFrame]:
@@ -1989,6 +2046,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(description="Plot averaged experiment results.")
     parser.add_argument(
+        "--suite",
+        choices=("multiseed", "cka_strength", "all"),
+        default="all",
+        help=(
+            "Averaged suite to plot when --avg_dir is omitted. Defaults to all, "
+            "which discovers both multiseed and CKA-strength results."
+        ),
+    )
+    parser.add_argument(
         "--avg_dir",
         "--avg-dir",
         dest="avg_dir",
@@ -2001,8 +2067,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--log-dir",
         dest="log_dir",
         type=Path,
-        default=Path("results/logs"),
+        default=None,
         help="Raw log directory for legacy plotting when --avg_dir is omitted.",
+    )
+    parser.add_argument(
+        "--averaged_root",
+        "--averaged-root",
+        dest="averaged_root",
+        type=Path,
+        default=Path("results/averaged"),
+        help="Root directory containing averaged suite folders.",
     )
     parser.add_argument(
         "--plot_dir",
@@ -2023,13 +2097,21 @@ def main(argv: list[str] | None = None) -> int:
         saved_paths = generate_plots_from_averages(args.avg_dir, args.plot_dir)
         if not saved_paths:
             return 1
-    else:
+    elif args.log_dir is not None:
         print(
             "Warning: plotting raw logs directly is kept for compatibility. "
             "For final figures, run experiments/aggregate_results.py first and "
             "then pass --avg_dir."
         )
         saved_paths = generate_all_plots(args.log_dir, args.plot_dir)
+    else:
+        saved_paths = generate_plots_for_discovered_averages(
+            args.averaged_root,
+            args.plot_dir,
+            args.suite,
+        )
+        if not saved_paths:
+            return 1
     for path in saved_paths:
         print(f"Saved plot: {path}")
     return 0
