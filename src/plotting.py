@@ -79,6 +79,14 @@ CKA_STRENGTH_MARKERS = {
     0.9: "D",
     1.0: "X",
 }
+AVERAGED_FILES = {
+    "round": "round_metrics_mean_std.csv",
+    "final": "final_metrics_mean_std.csv",
+    "best": "best_metrics_mean_std.csv",
+    "layer_sparsity": "layerwise_sparsity_mean_std.csv",
+    "layer_cka": "layerwise_cka_mean_std.csv",
+    "manifest": "aggregation_manifest.csv",
+}
 
 
 def generate_all_plots(
@@ -122,6 +130,272 @@ def generate_all_plots(
         saved_paths.append(cka_path)
 
     return saved_paths
+
+
+def generate_plots_from_averages(
+    avg_dir: Path,
+    plot_dir: Path = Path("results/plots"),
+) -> list[Path]:
+    """Create final research plots from pre-aggregated mean/std CSVs."""
+
+    averaged = load_averaged_results(avg_dir)
+    if not averaged:
+        print(
+            f"Warning: no averaged CSV files found in {avg_dir}. "
+            "Run experiments/aggregate_results.py first."
+        )
+        return []
+
+    if averaged.get("round", pd.DataFrame()).empty:
+        print(
+            f"Warning: {avg_dir / AVERAGED_FILES['round']} is missing or empty. "
+            "Cannot create averaged plots."
+        )
+        return []
+
+    plot_dir.mkdir(parents=True, exist_ok=True)
+    saved_paths: list[Path] = []
+    plotters = [
+        plot_avg_accuracy_vs_rounds,
+        plot_avg_final_accuracy_vs_sparsity,
+        plot_avg_best_accuracy_vs_sparsity,
+        plot_avg_cka_strength_accuracy_vs_rounds,
+        plot_avg_cka_strength_final_accuracy_vs_sparsity,
+        plot_avg_cka_strength_best_accuracy_vs_sparsity,
+        plot_avg_layerwise_sparsity,
+        plot_avg_layerwise_cka,
+    ]
+    for plotter in plotters:
+        path = plotter(averaged, plot_dir)
+        if path is not None:
+            saved_paths.append(path)
+    return saved_paths
+
+
+def load_averaged_results(avg_dir: Path) -> dict[str, pd.DataFrame]:
+    """Read averaged result CSVs from an aggregation output directory."""
+
+    avg_dir = Path(avg_dir)
+    frames: dict[str, pd.DataFrame] = {}
+    for key, filename in AVERAGED_FILES.items():
+        path = avg_dir / filename
+        if not path.exists():
+            print(f"Warning: missing averaged file {path}.")
+            frames[key] = pd.DataFrame()
+            continue
+        try:
+            frame = pd.read_csv(path)
+        except Exception as exc:
+            print(f"Warning: could not read averaged file {path}: {exc}")
+            frame = pd.DataFrame()
+        frames[key] = coerce_numeric_columns(
+            frame,
+            [
+                "round",
+                "sparsity",
+                "cka_strength",
+                "mean",
+                "std",
+                "count",
+                "seed_count",
+            ],
+        )
+    return frames
+
+
+def plot_avg_accuracy_vs_rounds(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot averaged test accuracy over rounds with std bands."""
+
+    rows = averaged_metric_rows(averaged.get("round"), "test_accuracy")
+    if rows.empty:
+        print("Warning: no averaged round test_accuracy data found.")
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    include_cka = has_multiple_cka_strengths(rows)
+    for (method, sparsity, cka_strength), group in rows.groupby(
+        ["method", "sparsity", "cka_strength"],
+        dropna=False,
+        sort=False,
+    ):
+        group = group.sort_values("round")
+        style = sparsity_style(sparsity)
+        color = method_color(method)
+        ax.plot(
+            group["round"],
+            group["mean"],
+            color=color,
+            marker=style["marker"],
+            linestyle=style["linestyle"],
+            linewidth=2,
+            markersize=5,
+            label=aggregate_method_label(method, sparsity, cka_strength, include_cka),
+        )
+        add_std_band(ax, group, color, alpha=0.12)
+
+    style_axes(
+        ax,
+        "Mean Test Accuracy vs Communication Rounds",
+        "Communication Round",
+        "Mean Test Accuracy",
+    )
+    return save_figure(fig, plot_dir / "accuracy_vs_rounds_mean_std.png")
+
+
+def plot_avg_final_accuracy_vs_sparsity(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot final averaged accuracy against sparsity."""
+
+    return plot_avg_accuracy_summary(
+        averaged.get("final"),
+        plot_dir / "final_accuracy_mean_std_vs_sparsity.png",
+        "Final Accuracy Mean/Std vs Sparsity",
+        "Final Test Accuracy",
+        dense_label="FedAvg dense mean",
+    )
+
+
+def plot_avg_best_accuracy_vs_sparsity(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot best averaged accuracy against sparsity."""
+
+    return plot_avg_accuracy_summary(
+        averaged.get("best"),
+        plot_dir / "best_accuracy_mean_std_vs_sparsity.png",
+        "Best Accuracy Mean/Std vs Sparsity",
+        "Best Test Accuracy",
+        dense_label="FedAvg dense best mean",
+    )
+
+
+def plot_avg_cka_strength_accuracy_vs_rounds(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot averaged CKA-FedDST accuracy over rounds by CKA strength."""
+
+    rows = averaged_metric_rows(averaged.get("round"), "test_accuracy")
+    rows = cka_strength_logs(rows)
+    if rows.empty or len(unique_cka_strengths(rows)) < 2:
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    for (strength, sparsity), group in rows.groupby(
+        ["cka_strength", "sparsity"],
+        dropna=False,
+        sort=False,
+    ):
+        group = group.sort_values("round")
+        style = sparsity_style(sparsity)
+        color = cka_strength_color(strength)
+        ax.plot(
+            group["round"],
+            group["mean"],
+            color=color,
+            marker=style["marker"],
+            linestyle=style["linestyle"],
+            linewidth=2,
+            markersize=5,
+            label="_nolegend_",
+        )
+        add_std_band(ax, group, color, alpha=0.10)
+
+    style_axes(
+        ax,
+        "CKA-FedDST Accuracy by CKA Strength",
+        "Communication Round",
+        "Mean Test Accuracy",
+        show_legend=False,
+    )
+    add_cka_strength_sparsity_legends(ax, rows)
+    return save_figure(fig, plot_dir / "cka_strength_accuracy_vs_rounds.png")
+
+
+def plot_avg_cka_strength_final_accuracy_vs_sparsity(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot final averaged CKA-FedDST accuracy by CKA strength."""
+
+    return plot_avg_cka_strength_summary(
+        averaged.get("final"),
+        plot_dir / "cka_strength_final_accuracy_vs_sparsity.png",
+        "CKA Strength Final Accuracy vs Sparsity",
+        "Final Test Accuracy",
+    )
+
+
+def plot_avg_cka_strength_best_accuracy_vs_sparsity(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot best averaged CKA-FedDST accuracy by CKA strength."""
+
+    return plot_avg_cka_strength_summary(
+        averaged.get("best"),
+        plot_dir / "cka_strength_best_accuracy_vs_sparsity.png",
+        "CKA Strength Best Accuracy vs Sparsity",
+        "Best Test Accuracy",
+    )
+
+
+def plot_avg_layerwise_sparsity(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot averaged CKA-FedDST actual layer sparsity over rounds."""
+
+    rows = averaged.get("layer_sparsity", pd.DataFrame())
+    if rows.empty:
+        return None
+    cka_rows = rows[rows["method"] == "cka_feddst"]
+    if cka_rows.empty:
+        return None
+    rows = cka_rows[cka_rows["metric"] == "actual_sparsity"].dropna(
+        subset=["round", "mean"]
+    )
+    if rows.empty:
+        print("Warning: no averaged CKA-FedDST layer sparsity data found.")
+        return None
+
+    return plot_avg_layerwise_rounds(
+        rows,
+        plot_dir / "cka_feddst_layerwise_sparsity.png",
+        "CKA-FedDST Layer-wise Sparsity",
+        "Layer Sparsity",
+    )
+
+
+def plot_avg_layerwise_cka(
+    averaged: dict[str, pd.DataFrame],
+    plot_dir: Path,
+) -> Path | None:
+    """Plot averaged CKA-FedDST layer-wise CKA over rounds."""
+
+    rows = averaged.get("layer_cka", pd.DataFrame())
+    if rows.empty:
+        return None
+    cka_rows = rows[rows["method"] == "cka_feddst"]
+    if cka_rows.empty:
+        return None
+    rows = cka_rows[cka_rows["metric"] == "cka"].dropna(subset=["round", "mean"])
+    if rows.empty:
+        print("Warning: no averaged CKA-FedDST layer CKA data found.")
+        return None
+
+    return plot_avg_layerwise_rounds(
+        rows,
+        plot_dir / "cka_feddst_layerwise_cka.png",
+        "CKA-FedDST Layer-wise CKA",
+        "Average Pairwise CKA",
+    )
 
 
 def load_training_logs(log_dir: Path) -> pd.DataFrame:
@@ -786,6 +1060,148 @@ def aggregate_metric(
     )
 
 
+def averaged_metric_rows(frame: pd.DataFrame | None, metric: str) -> pd.DataFrame:
+    """Return rows for one metric from an averaged long-format table."""
+
+    if frame is None or frame.empty or "metric" not in frame.columns:
+        return pd.DataFrame()
+    rows = frame[frame["metric"] == metric].copy()
+    return rows.dropna(subset=["mean"]) if "mean" in rows.columns else pd.DataFrame()
+
+
+def add_std_band(ax, group: pd.DataFrame, color: str, alpha: float = 0.12) -> None:
+    """Draw a mean +/- std band for an averaged line when std is available."""
+
+    if "std" not in group.columns or group["std"].dropna().empty:
+        return
+    mean = pd.to_numeric(group["mean"], errors="coerce")
+    std = pd.to_numeric(group["std"], errors="coerce").fillna(0.0)
+    ax.fill_between(
+        group["round"].astype(float),
+        mean - std,
+        mean + std,
+        color=color,
+        alpha=alpha,
+        linewidth=0,
+    )
+
+
+def plot_avg_accuracy_summary(
+    frame: pd.DataFrame | None,
+    output_path: Path,
+    title: str,
+    ylabel: str,
+    dense_label: str,
+) -> Path | None:
+    """Plot a final/best averaged accuracy summary over sparsity."""
+
+    rows = averaged_metric_rows(frame, "test_accuracy")
+    if rows.empty:
+        return None
+
+    sparse_rows = rows[rows["method"].isin(SPARSE_METHODS)].copy()
+    if sparse_rows.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.5))
+    add_dense_average_reference(ax, rows, dense_label)
+    include_cka = has_multiple_cka_strengths(sparse_rows)
+    plotted = plot_accuracy_summary_by_sparsity(
+        ax,
+        sparse_rows,
+        include_cka_strength=include_cka,
+    )
+    if not plotted:
+        plt.close(fig)
+        return None
+
+    style_axes(ax, title, "Sparsity", ylabel)
+    ax.legend(title="Method", fontsize=8)
+    return save_figure(fig, output_path)
+
+
+def plot_avg_cka_strength_summary(
+    frame: pd.DataFrame | None,
+    output_path: Path,
+    title: str,
+    ylabel: str,
+) -> Path | None:
+    """Plot CKA-strength final/best summaries from averaged tables."""
+
+    rows = averaged_metric_rows(frame, "test_accuracy")
+    rows = cka_strength_logs(rows)
+    if rows.empty or len(unique_cka_strengths(rows)) < 2:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.5))
+    for strength, group in rows.groupby("cka_strength", sort=True):
+        group = group.sort_values("sparsity")
+        ax.errorbar(
+            group["sparsity"],
+            group["mean"],
+            yerr=group["std"].fillna(0.0),
+            color=cka_strength_color(strength),
+            marker=cka_strength_marker(strength),
+            linewidth=2.2,
+            markersize=6,
+            capsize=3,
+            label=f"cka_strength={format_sparsity(strength)}",
+        )
+
+    style_axes(ax, title, "Sparsity", ylabel)
+    ax.legend(title="CKA strength", fontsize=8)
+    return save_figure(fig, output_path)
+
+
+def plot_avg_layerwise_rounds(
+    rows: pd.DataFrame,
+    output_path: Path,
+    title: str,
+    ylabel: str,
+) -> Path | None:
+    """Plot averaged layer-wise round metrics."""
+
+    if rows.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    has_strengths = len(unique_cka_strengths(rows)) > 1
+    plotted_layers: set[str] = set()
+    for (sparsity, strength, layer), group in rows.groupby(
+        ["sparsity", "cka_strength", "layer"],
+        dropna=False,
+        sort=False,
+    ):
+        group = group.sort_values("round")
+        color = cka_strength_color(strength) if has_strengths else sparsity_color(sparsity)
+        style = sparsity_style(sparsity)
+        plotted_layers.add(str(layer))
+        ax.plot(
+            group["round"],
+            group["mean"],
+            color=color,
+            marker=style["marker"],
+            linestyle=layer_linestyle(str(layer)),
+            linewidth=1.8,
+            markersize=5,
+            label="_nolegend_",
+        )
+
+    style_axes(
+        ax,
+        title,
+        "Communication Round",
+        ylabel,
+        show_legend=False,
+    )
+    if has_strengths:
+        add_cka_strength_sparsity_legends(ax, rows)
+        add_layer_legend(ax, sorted(plotted_layers), loc="center left")
+    else:
+        add_sparsity_layer_legends(ax, rows, sorted(plotted_layers))
+    return save_figure(fig, output_path)
+
+
 def plot_accuracy_summary_by_sparsity(
     ax,
     aggregate: pd.DataFrame,
@@ -887,6 +1303,44 @@ def add_dense_mean_reference(
         label=label,
     )
     if len(values) > 1 and not pd.isna(std):
+        ax.axhspan(
+            mean - std,
+            mean + std,
+            color=method_color("fedavg"),
+            alpha=0.08,
+        )
+
+
+def add_dense_average_reference(
+    ax,
+    rows: pd.DataFrame,
+    label: str,
+) -> None:
+    """Draw an averaged FedAvg reference line from mean/std summary rows."""
+
+    if rows.empty or "mean" not in rows.columns:
+        return
+    fedavg = rows[rows["method"] == "fedavg"]
+    if fedavg.empty:
+        return
+    value = pd.to_numeric(fedavg["mean"], errors="coerce").dropna()
+    if value.empty:
+        return
+    mean = value.iloc[0]
+    std_values = (
+        pd.to_numeric(fedavg["std"], errors="coerce").dropna()
+        if "std" in fedavg.columns
+        else pd.Series(dtype=float)
+    )
+    std = std_values.iloc[0] if not std_values.empty else pd.NA
+    ax.axhline(
+        mean,
+        color=method_color("fedavg"),
+        linestyle="--",
+        linewidth=2,
+        label=label,
+    )
+    if not pd.isna(std):
         ax.axhspan(
             mean - std,
             mean + std,
@@ -1023,13 +1477,14 @@ def add_cka_strength_sparsity_legends(ax, logs: pd.DataFrame) -> None:
         )
         ax.add_artist(strength_legend)
     if sparsity_handles:
-        ax.legend(
+        sparsity_legend = ax.legend(
             handles=sparsity_handles,
             title="Sparsity",
             loc="lower left",
             bbox_to_anchor=(1.02, 0.0),
             fontsize=8,
         )
+        ax.add_artist(sparsity_legend)
 
 
 def sparse_only(logs: pd.DataFrame) -> pd.DataFrame:
@@ -1345,6 +1800,32 @@ def add_sparsity_layer_legends(
         )
 
 
+def add_layer_legend(ax, layers: list[str], loc: str = "lower left") -> None:
+    """Add a layer line-style legend to an axis."""
+
+    if not layers:
+        return
+    handles = [
+        Line2D(
+            [0],
+            [0],
+            color="#333333",
+            linestyle=layer_linestyle(layer),
+            linewidth=2,
+            label=layer,
+        )
+        for layer in layers
+    ]
+    layer_legend = ax.legend(
+        handles=handles,
+        title="Layer",
+        loc=loc,
+        bbox_to_anchor=(1.02, 0.5),
+        fontsize=8,
+    )
+    ax.add_artist(layer_legend)
+
+
 def unique_sparsities(logs: pd.DataFrame) -> list[float]:
     """Return stable, sorted sparsity values from a log frame."""
 
@@ -1440,7 +1921,8 @@ def cka_value_columns(frame: pd.DataFrame) -> list[str]:
     return [
         column
         for column in frame.columns
-        if column.startswith("cka_") and column != "cka_computed"
+        if column.startswith("cka_")
+        and column not in {"cka_computed", "cka_strength"}
     ]
 
 
@@ -1505,13 +1987,22 @@ def save_training_curve(history, output_path: Path) -> Path:
 def build_parser() -> argparse.ArgumentParser:
     """Create a CLI parser for plotting."""
 
-    parser = argparse.ArgumentParser(description="Plot experiment CSV logs.")
+    parser = argparse.ArgumentParser(description="Plot averaged experiment results.")
+    parser.add_argument(
+        "--avg_dir",
+        "--avg-dir",
+        dest="avg_dir",
+        type=Path,
+        default=None,
+        help="Directory containing averaged CSVs from aggregate_results.py.",
+    )
     parser.add_argument(
         "--log_dir",
         "--log-dir",
         dest="log_dir",
         type=Path,
         default=Path("results/logs"),
+        help="Raw log directory for legacy plotting when --avg_dir is omitted.",
     )
     parser.add_argument(
         "--plot_dir",
@@ -1528,7 +2019,17 @@ def main(argv: list[str] | None = None) -> int:
     """CLI entry point for result plotting."""
 
     args = build_parser().parse_args(argv)
-    saved_paths = generate_all_plots(args.log_dir, args.plot_dir)
+    if args.avg_dir is not None:
+        saved_paths = generate_plots_from_averages(args.avg_dir, args.plot_dir)
+        if not saved_paths:
+            return 1
+    else:
+        print(
+            "Warning: plotting raw logs directly is kept for compatibility. "
+            "For final figures, run experiments/aggregate_results.py first and "
+            "then pass --avg_dir."
+        )
+        saved_paths = generate_all_plots(args.log_dir, args.plot_dir)
     for path in saved_paths:
         print(f"Saved plot: {path}")
     return 0

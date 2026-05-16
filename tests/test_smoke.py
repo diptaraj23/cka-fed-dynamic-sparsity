@@ -6,13 +6,17 @@ catch import, configuration, model, sparsity, and experiment-runner regressions.
 
 from __future__ import annotations
 
+import csv
+import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 import torch
 
 from experiments.run_experiment import build_parser as build_runner_parser
 from experiments.run_experiment import build_run_specs
+from src.aggregation import aggregate_results
 from src.cka import linear_cka
 from src.data import (
     DataConfig,
@@ -27,6 +31,7 @@ from src.sparsity import (
     create_masks,
     sparsity_summary,
 )
+from src.plotting import generate_plots_from_averages
 from src.train import build_parser as build_train_parser
 from src.train import load_final_config
 
@@ -144,6 +149,79 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(len(build_run_specs(multiseed_args, "test_suite")), 80)
         self.assertEqual(len(build_run_specs(cka_args, "test_suite")), 125)
         self.assertEqual(len(build_run_specs(all_args, "test_suite")), 205)
+
+    def test_aggregation_and_average_plotting_use_summary_csvs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            log_dir = root / "logs"
+            avg_dir = root / "averaged"
+            plot_dir = root / "plots"
+            log_dir.mkdir()
+
+            write_training_log(
+                log_dir / "sparse_fedavg_mnist_sparsity0.8_seed1.csv",
+                method="sparse_fedavg",
+                seed=1,
+                accuracies=(0.30, 0.40),
+            )
+            write_training_log(
+                log_dir / "sparse_fedavg_mnist_sparsity0.8_seed2.csv",
+                method="sparse_fedavg",
+                seed=2,
+                accuracies=(0.50, 0.60),
+            )
+
+            saved = aggregate_results(log_dir, avg_dir, suite="multiseed")
+            self.assertTrue(all(path.exists() for path in saved))
+
+            round_metrics = read_csv(avg_dir / "round_metrics_mean_std.csv")
+            target = [
+                row for row in round_metrics
+                if row["metric"] == "test_accuracy"
+                and row["method"] == "sparse_fedavg"
+                and row["round"] == "2"
+            ][0]
+            self.assertAlmostEqual(float(target["mean"]), 0.50)
+            self.assertEqual(target["seed_count"], "2")
+            self.assertEqual(target["seeds"], "1,2")
+
+            plots = generate_plots_from_averages(avg_dir, plot_dir)
+            self.assertTrue(plots)
+            self.assertTrue((plot_dir / "accuracy_vs_rounds_mean_std.png").exists())
+
+def write_training_log(path: Path, method: str, seed: int, accuracies) -> None:
+    """Write a tiny two-round training log for aggregation tests."""
+
+    rows = []
+    for round_id, accuracy in enumerate(accuracies, start=1):
+        rows.append(
+            {
+                "method": method,
+                "dataset": "mnist",
+                "sparsity": "0.8",
+                "seed": str(seed),
+                "round": str(round_id),
+                "test_accuracy": str(accuracy),
+                "test_loss": str(1.0 - accuracy),
+                "avg_train_loss": str(1.2 - accuracy),
+                "total_sparsity": "0.8",
+                "active_params": "100",
+                "total_params": "500",
+                "sparsity_conv1_weight": "0.7",
+            }
+        )
+
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def read_csv(path: Path) -> list[dict]:
+    """Read a CSV as dictionaries for compact assertions."""
+
+    with path.open("r", newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
 
 
 if __name__ == "__main__":

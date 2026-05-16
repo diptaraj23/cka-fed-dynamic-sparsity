@@ -180,15 +180,30 @@ python experiments/plot_results.py
 python experiments/plot_results.py --log_dir results/logs --plot_dir results/plots
 ```
 
+For final multi-seed analysis, first aggregate raw logs into reusable mean/std
+CSV files:
+
+```bash
+python experiments/aggregate_results.py \
+  --suite multiseed \
+  --log_dir results/logs/multiseed/<suite_id> \
+  --output_dir results/averaged/multiseed/<suite_id>
+
+python experiments/aggregate_results.py \
+  --suite cka_strength \
+  --log_dir results/logs/cka_strength_sweep/<suite_id> \
+  --output_dir results/averaged/cka_strength_sweep/<suite_id>
+```
+
 For suite-specific figures, point the plotting script at one suite folder:
 
 ```bash
 python experiments/plot_results.py \
-  --log_dir results/logs/multiseed/<suite_id> \
+  --avg_dir results/averaged/multiseed/<suite_id> \
   --plot_dir results/plots/multiseed/<suite_id>
 
 python experiments/plot_results.py \
-  --log_dir results/logs/cka_strength_sweep/<suite_id> \
+  --avg_dir results/averaged/cka_strength_sweep/<suite_id> \
   --plot_dir results/plots/cka_strength_sweep/<suite_id>
 ```
 
@@ -213,6 +228,8 @@ example:
 ```text
 results/logs/multiseed/<suite_id>/seed_42/
 results/logs/cka_strength_sweep/<suite_id>/strength_0p8/seed_42/
+results/averaged/multiseed/<suite_id>/
+results/averaged/cka_strength_sweep/<suite_id>/
 results/plots/multiseed/<suite_id>/
 results/plots/cka_strength_sweep/<suite_id>/
 ```
@@ -238,6 +255,15 @@ Logs include, depending on the method:
 Data split manifests are saved under a `splits/` folder inside the active log
 directory. These JSON files record exact client indices, reference indices, and
 label distributions.
+
+Averaged result tables are saved to:
+
+```text
+results/averaged/
+```
+
+They include round-level, final, best, layer-wise sparsity, and layer-wise CKA
+mean/std summaries across seeds. These are the preferred inputs for final plots.
 
 Plots are saved to:
 
