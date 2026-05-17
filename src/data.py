@@ -1,7 +1,7 @@
-"""MNIST data pipeline for simulated federated learning experiments."""
+"""Data pipeline for simulated federated learning image experiments."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -9,10 +9,14 @@ import numpy as np
 from .utils import make_torch_generator, seed_everything, seed_worker
 
 
+SUPPORTED_DATASETS = {"mnist", "fashion_mnist"}
+
+
 @dataclass(frozen=True)
 class DataConfig:
-    """Configuration for MNIST data preparation."""
+    """Configuration for federated data preparation."""
 
+    dataset: str = "mnist"
     data_dir: Path = Path("data")
     num_clients: int = 10
     alpha: float = 0.5
@@ -26,7 +30,21 @@ class DataConfig:
 
 
 def load_mnist(config: DataConfig | None = None):
-    """Build federated MNIST train loaders, a test loader, and CKA reference loader.
+    """Build federated MNIST loaders.
+
+    This compatibility wrapper preserves older imports while the generic
+    loader supports additional MNIST-style datasets.
+    """
+
+    if config is None:
+        config = DataConfig(dataset="mnist")
+    else:
+        config = replace(config, dataset="mnist")
+    return load_federated_data(config)
+
+
+def load_federated_data(config: DataConfig | None = None):
+    """Build federated train loaders, a test loader, and a CKA reference loader.
 
     Args:
         config: Dataset, partitioning, and dataloader settings.
@@ -45,14 +63,15 @@ def load_mnist(config: DataConfig | None = None):
     datasets, transforms = _load_torchvision()
     data_dir = Path(config.data_dir)
     transform = transforms.ToTensor()
+    dataset_cls = _dataset_class(datasets, config.dataset)
 
-    train_dataset = datasets.MNIST(
+    train_dataset = dataset_cls(
         root=str(data_dir),
         train=True,
         download=config.download,
         transform=transform,
     )
-    test_dataset = datasets.MNIST(
+    test_dataset = dataset_cls(
         root=str(data_dir),
         train=False,
         download=config.download,
@@ -262,7 +281,8 @@ def make_split_manifest_path(config: DataConfig) -> Path:
 
     alpha_token = str(config.alpha).replace(".", "p")
     filename = (
-        f"mnist_split_seed{config.seed}_clients{config.num_clients}_"
+        f"{_dataset_token(config.dataset)}_split_seed{config.seed}_"
+        f"clients{config.num_clients}_"
         f"alpha{alpha_token}_ref{config.reference_size}.json"
     )
     return Path(config.split_dir) / filename
@@ -307,12 +327,13 @@ def save_split_manifest(
         dtype=np.int64,
     )
     manifest = {
+        "dataset": _dataset_token(config.dataset),
         "seed": int(config.seed),
         "num_clients": int(config.num_clients),
         "alpha": float(config.alpha),
         "reference_size": int(config.reference_size),
         "num_train_samples_reserved_for_reference": int(len(reference_indices)),
-        "reference_source": "mnist_train",
+        "reference_source": f"{_dataset_token(config.dataset)}_train",
         "reference_label_distribution": label_distribution(
             labels[reference_indices],
             num_classes=num_classes,
@@ -328,6 +349,11 @@ def save_split_manifest(
 def _validate_config(config: DataConfig) -> None:
     """Validate user-facing data settings early."""
 
+    if _dataset_token(config.dataset) not in SUPPORTED_DATASETS:
+        supported = ", ".join(sorted(SUPPORTED_DATASETS))
+        raise ValueError(
+            f"Unsupported dataset '{config.dataset}'. Expected one of: {supported}."
+        )
     if config.num_clients <= 0:
         raise ValueError("num_clients must be positive.")
     if config.alpha <= 0:
@@ -357,11 +383,29 @@ def _load_torchvision():
         from torchvision import datasets, transforms
     except ModuleNotFoundError as exc:
         raise ModuleNotFoundError(
-            "torchvision is required to load MNIST. Install torchvision before "
-            "running data experiments."
+            "torchvision is required to load image datasets. Install torchvision "
+            "before running data experiments."
         ) from exc
 
     return datasets, transforms
+
+
+def _dataset_class(datasets, dataset: str):
+    """Return the torchvision dataset class for a supported dataset name."""
+
+    token = _dataset_token(dataset)
+    if token == "mnist":
+        return datasets.MNIST
+    if token == "fashion_mnist":
+        return datasets.FashionMNIST
+    supported = ", ".join(sorted(SUPPORTED_DATASETS))
+    raise ValueError(f"Unsupported dataset '{dataset}'. Expected one of: {supported}.")
+
+
+def _dataset_token(dataset: str) -> str:
+    """Normalize dataset names used by configs and filenames."""
+
+    return str(dataset).lower().replace("-", "_")
 
 
 def _load_dataloader():

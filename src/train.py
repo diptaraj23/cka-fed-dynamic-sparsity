@@ -16,7 +16,7 @@ from src.config import (
     merge_configs,
     save_config,
 )
-from src.data import DataConfig, load_mnist, make_split_manifest_path
+from src.data import DataConfig, load_federated_data, make_split_manifest_path
 from src.dst import DSTConfig
 from src.federated import (
     FederatedConfig,
@@ -189,6 +189,7 @@ def make_data_config(config: dict) -> DataConfig:
     """Build the data configuration from the merged experiment config."""
     split_dir = config.get("split_dir")
     return DataConfig(
+        dataset=str(config["dataset"]),
         data_dir=Path(config["data_dir"]),
         num_clients=int(config["num_clients"]),
         alpha=float(config["alpha"]),
@@ -235,7 +236,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
     """Run the configured federated learning method."""
     seed_everything(int(config["seed"]))
     data_config = make_data_config(config)
-    client_loaders, test_loader, reference_loader = load_mnist(data_config)
+    client_loaders, test_loader, reference_loader = load_federated_data(data_config)
     if bool(config.get("data_check", False)):
         return []
 

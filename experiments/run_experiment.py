@@ -17,6 +17,11 @@ DEFAULT_SEEDS = (42, 7, 13, 21, 100)
 DEFAULT_CKA_STRENGTHS = (0.2, 0.5, 0.8, 0.9, 1.0)
 DEFAULT_METHODS = ("sparse_fedavg", "feddst", "cka_feddst")
 SUITES = ("sparsity", "multiseed", "cka_strength", "all")
+DATASETS = ("mnist", "fashion_mnist")
+GLOBAL_CONFIGS = {
+    "mnist": Path("configs/global.yaml"),
+    "fashion_mnist": Path("configs/global_fashion_mnist.yaml"),
+}
 CONFIGS = {
     "fedavg": Path("configs/fedavg_mnist.yaml"),
     "sparse_fedavg": Path("configs/sparse_fedavg_mnist.yaml"),
@@ -32,6 +37,7 @@ MANIFEST_COLUMNS = (
     "seed",
     "sparsity",
     "cka_strength",
+    "global_config",
     "config",
     "log_dir",
     "checkpoint_dir",
@@ -48,6 +54,7 @@ class RunSpec:
     suite: str
     suite_id: str
     method: str
+    global_config_path: Path
     config_path: Path
     seed: int
     sparsity: float | None = None
@@ -69,6 +76,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=SUITES,
         default="sparsity",
         help="Experiment suite to run.",
+    )
+    parser.add_argument(
+        "--dataset",
+        choices=DATASETS,
+        default="mnist",
+        help="Dataset global configuration to use.",
     )
     parser.add_argument(
         "--suite-id",
@@ -132,13 +145,18 @@ def main(argv: list[str] | None = None) -> int:
     """Run all requested experiments sequentially."""
 
     args = build_parser().parse_args(argv)
-    suite_id = safe_token(args.suite_id) if args.suite_id else make_suite_id(args.suite)
+    suite_id = (
+        safe_token(args.suite_id)
+        if args.suite_id
+        else make_suite_id(args.suite, args.dataset)
+    )
     specs = build_run_specs(args, suite_id)
     total_runs = len(specs)
     manifest_rows = build_manifest_rows(specs)
     failures = []
 
     print(f"Suite: {args.suite}")
+    print(f"Dataset: {args.dataset}")
     print(f"Suite id: {suite_id}")
     print(f"Planned runs: {total_runs}")
     effective_seeds = sorted({spec.seed for spec in specs})
@@ -237,6 +255,7 @@ def build_sparsity_specs(args: argparse.Namespace, suite_id: str) -> list[RunSpe
                 suite="sparsity",
                 suite_id=suite_id,
                 method="fedavg",
+                global_config_path=global_config_path(args.dataset),
                 config_path=CONFIGS["fedavg"],
                 seed=42,
             )
@@ -249,6 +268,7 @@ def build_sparsity_specs(args: argparse.Namespace, suite_id: str) -> list[RunSpe
                     suite="sparsity",
                     suite_id=suite_id,
                     method=method,
+                    global_config_path=global_config_path(args.dataset),
                     config_path=CONFIGS[method],
                     seed=42,
                     sparsity=sparsity,
@@ -275,6 +295,7 @@ def build_multiseed_specs(args: argparse.Namespace, suite_id: str) -> list[RunSp
                     suite="multiseed",
                     suite_id=suite_id,
                     method="fedavg",
+                    global_config_path=global_config_path(args.dataset),
                     config_path=CONFIGS["fedavg"],
                     seed=seed,
                     log_dir=log_dir,
@@ -291,6 +312,7 @@ def build_multiseed_specs(args: argparse.Namespace, suite_id: str) -> list[RunSp
                         suite="multiseed",
                         suite_id=suite_id,
                         method=method,
+                        global_config_path=global_config_path(args.dataset),
                         config_path=CONFIGS[method],
                         seed=seed,
                         sparsity=sparsity,
@@ -333,6 +355,7 @@ def build_cka_strength_specs(args: argparse.Namespace, suite_id: str) -> list[Ru
                         suite="cka_strength",
                         suite_id=suite_id,
                         method="cka_feddst",
+                        global_config_path=global_config_path(args.dataset),
                         config_path=CONFIGS["cka_feddst"],
                         seed=seed,
                         sparsity=sparsity,
@@ -353,6 +376,8 @@ def build_command(spec: RunSpec) -> list[str]:
         sys.executable,
         "-m",
         "src.train",
+        "--global-config",
+        str(spec.global_config_path),
         "--config",
         str(spec.config_path),
         "--seed",
@@ -389,6 +414,7 @@ def build_manifest_rows(specs: list[RunSpec]) -> list[dict]:
                 "cka_strength": (
                     "" if spec.cka_strength is None else format_float(spec.cka_strength)
                 ),
+                "global_config": str(spec.global_config_path),
                 "config": str(spec.config_path),
                 "log_dir": "" if spec.log_dir is None else str(spec.log_dir),
                 "checkpoint_dir": (
@@ -442,11 +468,18 @@ def parse_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError("Expected true or false.")
 
 
-def make_suite_id(suite: str) -> str:
+def global_config_path(dataset: str) -> Path:
+    """Return the shared global config for a dataset."""
+
+    return GLOBAL_CONFIGS[dataset]
+
+
+def make_suite_id(suite: str, dataset: str = "mnist") -> str:
     """Create a timestamped suite id."""
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return safe_token(f"{suite}_{timestamp}")
+    prefix = suite if dataset == "mnist" else f"{dataset}_{suite}"
+    return safe_token(f"{prefix}_{timestamp}")
 
 
 def safe_token(value: object) -> str:

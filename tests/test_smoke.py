@@ -15,12 +15,14 @@ import numpy as np
 import torch
 
 from experiments.run_experiment import build_parser as build_runner_parser
+from experiments.run_experiment import build_command
 from experiments.run_experiment import build_run_specs
 from src.aggregation import aggregate_results
 from src.cka import linear_cka
 from src.data import (
     DataConfig,
     get_subset_indices,
+    make_split_manifest_path,
     make_balanced_reference_dataset,
     partition_clients,
 )
@@ -139,6 +141,35 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(config["num_clients"], 5)
         self.assertEqual(config["method"], "cka_feddst")
 
+    def test_fashion_mnist_config_keeps_method_files_reusable(self) -> None:
+        parser = build_train_parser()
+        args = parser.parse_args(
+            [
+                "--global_config",
+                "configs/global_fashion_mnist.yaml",
+                "--config",
+                "configs/fedavg_mnist.yaml",
+                "--dry-run",
+            ]
+        )
+
+        config = load_final_config(args)
+        split_path = make_split_manifest_path(
+            DataConfig(
+                dataset=config["dataset"],
+                split_dir=Path("splits"),
+                seed=config["seed"],
+                num_clients=config["num_clients"],
+                alpha=config["alpha"],
+                reference_size=config["reference_size"],
+            )
+        )
+
+        self.assertEqual(config["dataset"], "fashion_mnist")
+        self.assertEqual(config["model"], "small_cnn")
+        self.assertEqual(config["method"], "fedavg")
+        self.assertIn("fashion_mnist_split", split_path.name)
+
     def test_default_suite_run_counts_are_explicit(self) -> None:
         parser = build_runner_parser()
 
@@ -149,6 +180,31 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(len(build_run_specs(multiseed_args, "test_suite")), 80)
         self.assertEqual(len(build_run_specs(cka_args, "test_suite")), 125)
         self.assertEqual(len(build_run_specs(all_args, "test_suite")), 205)
+
+    def test_fashion_mnist_runner_uses_fashion_global_config(self) -> None:
+        parser = build_runner_parser()
+        args = parser.parse_args(
+            [
+                "--dataset",
+                "fashion_mnist",
+                "--suite",
+                "sparsity",
+                "--sparsities",
+                "0.8",
+                "--dry_run",
+            ]
+        )
+
+        specs = build_run_specs(args, "test_suite")
+        commands = [build_command(spec) for spec in specs]
+
+        self.assertEqual(len(specs), 4)
+        for command in commands:
+            global_config_index = command.index("--global-config") + 1
+            self.assertEqual(
+                Path(command[global_config_index]),
+                Path("configs/global_fashion_mnist.yaml"),
+            )
 
     def test_aggregation_and_average_plotting_use_summary_csvs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

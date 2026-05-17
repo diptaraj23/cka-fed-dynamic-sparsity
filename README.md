@@ -105,9 +105,10 @@ These targets are passed into the FedDST pruning and regrowth step.
 
 ## How to Run Experiments
 
-Experiments are configured with YAML files. Shared settings live in
-`configs/global.yaml`; method-specific files only contain values that differ
-from the shared setup.
+Experiments are configured with YAML files. Shared MNIST settings live in
+`configs/global.yaml`; Fashion-MNIST settings live in
+`configs/global_fashion_mnist.yaml`. Method-specific files only contain values
+that differ from the shared setup and can be reused across both datasets.
 
 Run a single method:
 
@@ -137,6 +138,14 @@ Command-line arguments override YAML values only when explicitly provided:
 
 ```bash
 python -m src.train --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.9
+```
+
+Run the same method on Fashion-MNIST by selecting the Fashion-MNIST global
+config:
+
+```bash
+python -m src.train --global_config configs/global_fashion_mnist.yaml --config configs/fedavg_mnist.yaml
+python -m src.train --global_config configs/global_fashion_mnist.yaml --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.8
 ```
 
 Run the main sparsity sweep. This runs dense FedAvg once, then Sparse FedAvg,
@@ -171,6 +180,14 @@ Preview a suite without launching training:
 
 ```bash
 python experiments/run_experiment.py --suite all --dry_run
+```
+
+Run Fashion-MNIST experiment suites with the same runner:
+
+```bash
+python experiments/run_experiment.py --dataset fashion_mnist --dry_run
+python experiments/run_experiment.py --dataset fashion_mnist --suite multiseed
+python experiments/run_experiment.py --dataset fashion_mnist --suite cka_strength
 ```
 
 Aggregate raw logs into reusable mean/std CSV files:
