@@ -22,7 +22,6 @@ data/
 # Logs and plots are intentionally tracked for this research prototype.
 results/_run_all_tmp/
 REPO_AUDIT_REPORT.md
-Analysis report/
 
 # Model artifacts
 *.pt
