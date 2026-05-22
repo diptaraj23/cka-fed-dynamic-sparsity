@@ -1,4 +1,4 @@
-"""Data pipeline for simulated federated learning image experiments."""
+"""Data pipeline for simulated federated learning on MNIST-style datasets."""
 
 import json
 from dataclasses import dataclass, replace
@@ -32,8 +32,9 @@ class DataConfig:
 def load_mnist(config: DataConfig | None = None):
     """Build federated MNIST loaders.
 
-    This compatibility wrapper preserves older imports while the generic
-    loader supports additional MNIST-style datasets.
+    This compatibility wrapper intentionally forces ``dataset='mnist'`` for
+    older imports. Use ``load_federated_data`` for dataset-selectable loading,
+    including Fashion-MNIST.
     """
 
     if config is None:
@@ -137,7 +138,8 @@ def partition_clients(
     """Split a labeled dataset into Dirichlet label-skew client subsets.
 
     Args:
-        dataset: Dataset with a ``targets`` attribute, such as torchvision MNIST.
+        dataset: Dataset with a ``targets`` attribute, such as torchvision
+            MNIST or Fashion-MNIST.
         config: Partitioning settings, including number of clients and alpha.
         exclude_indices: Optional dataset indices reserved outside client training.
 
