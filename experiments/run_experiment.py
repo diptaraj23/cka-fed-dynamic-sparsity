@@ -1,4 +1,4 @@
-"""Run MNIST experiment suites with isolated output folders."""
+"""Run dataset-specific experiment suites with isolated output folders."""
 
 from __future__ import annotations
 
@@ -69,7 +69,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Create the experiment runner CLI."""
 
     parser = argparse.ArgumentParser(
-        description="Run MNIST federated-learning experiment suites."
+        description="Run federated-learning experiment suites."
     )
     parser.add_argument(
         "--suite",
