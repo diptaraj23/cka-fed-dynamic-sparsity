@@ -1,0 +1,24 @@
+dataset: cifar10
+model: cifar_cnn
+num_clients: 5
+rounds: 20
+local_epochs: 1
+batch_size: 64
+lr: 0.01
+seed: 42
+alpha: 0.3
+device: auto
+data_dir: data
+output_dir: results
+log_dir: results/logs/cifar10
+checkpoint_dir: results/checkpoints/cifar10
+plot_dir: results/plots/cifar10
+reference_size: 500
+eval_interval: 1
+save_checkpoint: false
+num_workers: 2
+cka_layers:
+  - conv1
+  - conv2
+  - conv3
+  - fc1

@@ -17,10 +17,11 @@ DEFAULT_SEEDS = (42, 7, 13, 21, 100)
 DEFAULT_CKA_STRENGTHS = (0.2, 0.5, 0.8, 0.9, 1.0)
 DEFAULT_METHODS = ("sparse_fedavg", "feddst", "cka_feddst")
 SUITES = ("sparsity", "multiseed", "cka_strength", "all")
-DATASETS = ("mnist", "fashion_mnist")
+DATASETS = ("mnist", "fashion_mnist", "cifar10")
 GLOBAL_CONFIGS = {
     "mnist": Path("configs/global.yaml"),
     "fashion_mnist": Path("configs/global_fashion_mnist.yaml"),
+    "cifar10": Path("configs/global_cifar10.yaml"),
 }
 CONFIGS = {
     "fedavg": Path("configs/fedavg_mnist.yaml"),
