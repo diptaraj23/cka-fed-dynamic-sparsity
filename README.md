@@ -2,7 +2,7 @@
 
 ## Research Objective
 
-This repository is a research prototype for simulated federated learning on MNIST and Fashion-MNIST under non-IID client data. The goal is to compare dense, fixed-sparse, dynamic-sparse, and representation-guided sparse training methods in a controlled PyTorch codebase.
+This repository is a research prototype for simulated federated learning on MNIST, Fashion-MNIST, and CIFAR-10 under non-IID client data. The goal is to compare dense, fixed-sparse, dynamic-sparse, and representation-guided sparse training methods in a controlled PyTorch codebase.
 
 The proposed direction is to use layer-wise client representation similarity, measured with linear Centered Kernel Alignment (CKA), to guide how sparsity is allocated across layers during dynamic sparse federated learning.
 
@@ -36,7 +36,9 @@ This project currently supports four methods:
 
 ## Dataset and Non-IID Setup
 
-Experiments use MNIST and Fashion-MNIST through `torchvision`.
+Experiments use MNIST, Fashion-MNIST, and CIFAR-10 through `torchvision`.
+CIFAR-10 is included as the harder benchmark for testing whether richer images
+and deeper representations reduce CKA saturation.
 
 Training data is split across simulated clients using Dirichlet label-skew partitioning:
 
@@ -67,6 +69,18 @@ The forward pass can optionally return activations from:
 
 These activations are used for CKA analysis.
 
+For CIFAR-10, the default model is `SmallCIFARCNN`, selected with
+`model: cifar_cnn`. It accepts RGB `32 x 32` images and exposes activations
+from:
+
+- `conv1`
+- `conv2`
+- `conv3`
+- `fc1`
+
+These additional representation levels are intended to make layer-wise CKA
+less saturated than in the MNIST `SmallCNN` setup.
+
 ## Sparsity Method
 
 Sparse methods use unstructured binary masks over trainable weight tensors:
@@ -90,7 +104,7 @@ CKA-guided FedDST computes pairwise client CKA on the shared reference loader ev
 For each layer:
 
 1. Client models pass the reference data through the network.
-2. Activations from `conv1`, `conv2`, and `fc1` are flattened.
+2. Activations from the configured CKA layers are flattened.
 3. Linear CKA is computed pairwise across client models.
 4. The average upper-triangle CKA score is used as the layer similarity score.
 
@@ -107,8 +121,9 @@ These targets are passed into the FedDST pruning and regrowth step.
 
 Experiments are configured with YAML files. Shared MNIST settings live in
 `configs/global.yaml`; Fashion-MNIST settings live in
-`configs/global_fashion_mnist.yaml`. Method-specific files only contain values
-that differ from the shared setup and can be reused across both datasets.
+`configs/global_fashion_mnist.yaml`; CIFAR-10 settings live in
+`configs/global_cifar10.yaml`. Method-specific files only contain values
+that differ from the shared setup and can be reused across datasets.
 
 Run a single method:
 
@@ -188,6 +203,21 @@ Run Fashion-MNIST experiment suites with the same runner:
 python experiments/run_experiment.py --dataset fashion_mnist --dry_run
 python experiments/run_experiment.py --dataset fashion_mnist --suite multiseed
 python experiments/run_experiment.py --dataset fashion_mnist --suite cka_strength
+```
+
+Run CIFAR-10 single-method experiments by selecting the CIFAR-10 global config:
+
+```bash
+python -m src.train --global_config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml
+python -m src.train --global_config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.8
+```
+
+Run CIFAR-10 experiment-suite previews with the same runner:
+
+```bash
+python experiments/run_experiment.py --dataset cifar10 --dry_run
+python experiments/run_experiment.py --dataset cifar10 --suite multiseed --dry_run
+python experiments/run_experiment.py --dataset cifar10 --suite cka_strength --dry_run
 ```
 
 Aggregate raw logs into reusable mean/std CSV files:
@@ -336,8 +366,8 @@ This is a research prototype, not a final benchmark suite.
 Current limitations:
 
 - experiments are simulated on one machine
-- MNIST and Fashion-MNIST are supported, but CIFAR-10 and larger datasets are not yet implemented
-- the model is a small CNN
+- MNIST, Fashion-MNIST, and CIFAR-10 are supported, but larger datasets are not yet implemented
+- the models are small CNNs
 - client selection is currently full participation
 - hyperparameters are simple defaults, not tuned
 - CKA-guided target allocation is heuristic
@@ -358,7 +388,6 @@ python -m unittest discover -s tests
 
 Planned extensions:
 
-- add CIFAR-10 experiments
 - add ResNet-style models
 - scale to more clients
 - run more random seeds
@@ -378,8 +407,8 @@ results/
   plots/                 Generated figures
 archive/                 Tracked older experiment artifacts kept separate
 src/
-  data.py                MNIST/Fashion-MNIST loading and non-IID partitioning
-  models.py              SmallCNN model definition
+  data.py                MNIST/Fashion-MNIST/CIFAR-10 loading and non-IID partitioning
+  models.py              SmallCNN and SmallCIFARCNN model definitions
   federated.py           FedAvg, Sparse FedAvg, FedDST, CKA-FedDST loops
   sparsity.py            Mask creation and sparsity utilities
   dst.py                 Dynamic sparse pruning/regrowth
