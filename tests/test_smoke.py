@@ -66,6 +66,19 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(activations["conv2"].shape[0], 4)
         self.assertEqual(tuple(activations["fc1"].shape), (4, 128))
 
+    def test_cifar_model_forward_returns_expected_activations(self) -> None:
+        model = get_model("cifar_cnn", "cifar10")
+        inputs = torch.randn(4, 3, 32, 32)
+
+        logits, activations = model(inputs, return_activations=True)
+
+        self.assertEqual(tuple(logits.shape), (4, 10))
+        self.assertEqual({"conv1", "conv2", "conv3", "fc1"}, set(activations))
+        self.assertEqual(activations["conv1"].shape[0], 4)
+        self.assertEqual(activations["conv2"].shape[0], 4)
+        self.assertEqual(activations["conv3"].shape[0], 4)
+        self.assertEqual(tuple(activations["fc1"].shape), (4, 256))
+
     def test_sparsity_masks_exclude_biases_and_hold_target(self) -> None:
         model = get_model("small_cnn", "mnist")
         masks = create_masks(
@@ -170,6 +183,36 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(config["method"], "fedavg")
         self.assertIn("fashion_mnist_split", split_path.name)
 
+    def test_cifar10_config_keeps_method_files_reusable(self) -> None:
+        parser = build_train_parser()
+        args = parser.parse_args(
+            [
+                "--global_config",
+                "configs/global_cifar10.yaml",
+                "--config",
+                "configs/cka_feddst_mnist.yaml",
+                "--dry-run",
+            ]
+        )
+
+        config = load_final_config(args)
+        split_path = make_split_manifest_path(
+            DataConfig(
+                dataset=config["dataset"],
+                split_dir=Path("splits"),
+                seed=config["seed"],
+                num_clients=config["num_clients"],
+                alpha=config["alpha"],
+                reference_size=config["reference_size"],
+            )
+        )
+
+        self.assertEqual(config["dataset"], "cifar10")
+        self.assertEqual(config["model"], "cifar_cnn")
+        self.assertEqual(config["method"], "cka_feddst")
+        self.assertEqual(config["cka_layers"], ["conv1", "conv2", "conv3", "fc1"])
+        self.assertIn("cifar10_split", split_path.name)
+
     def test_default_suite_run_counts_are_explicit(self) -> None:
         parser = build_runner_parser()
 
@@ -204,6 +247,31 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
             self.assertEqual(
                 Path(command[global_config_index]),
                 Path("configs/global_fashion_mnist.yaml"),
+            )
+
+    def test_cifar10_runner_uses_cifar10_global_config(self) -> None:
+        parser = build_runner_parser()
+        args = parser.parse_args(
+            [
+                "--dataset",
+                "cifar10",
+                "--suite",
+                "sparsity",
+                "--sparsities",
+                "0.8",
+                "--dry_run",
+            ]
+        )
+
+        specs = build_run_specs(args, "test_suite")
+        commands = [build_command(spec) for spec in specs]
+
+        self.assertEqual(len(specs), 4)
+        for command in commands:
+            global_config_index = command.index("--global-config") + 1
+            self.assertEqual(
+                Path(command[global_config_index]),
+                Path("configs/global_cifar10.yaml"),
             )
 
     def test_aggregation_and_average_plotting_use_summary_csvs(self) -> None:
