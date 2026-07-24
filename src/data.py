@@ -1,4 +1,4 @@
-"""Data pipeline for simulated federated learning on MNIST-style datasets."""
+"""Data pipeline for simulated federated learning image datasets."""
 
 import json
 from dataclasses import dataclass, replace
@@ -9,7 +9,7 @@ import numpy as np
 from .utils import make_torch_generator, seed_everything, seed_worker
 
 
-SUPPORTED_DATASETS = {"mnist", "fashion_mnist"}
+SUPPORTED_DATASETS = {"mnist", "fashion_mnist", "cifar10"}
 
 
 @dataclass(frozen=True)
@@ -63,24 +63,30 @@ def load_federated_data(config: DataConfig | None = None):
 
     datasets, transforms = _load_torchvision()
     data_dir = Path(config.data_dir)
-    transform = transforms.ToTensor()
+    train_transform, eval_transform = _dataset_transforms(transforms, config.dataset)
     dataset_cls = _dataset_class(datasets, config.dataset)
 
     train_dataset = dataset_cls(
         root=str(data_dir),
         train=True,
         download=config.download,
-        transform=transform,
+        transform=train_transform,
+    )
+    reference_source_dataset = dataset_cls(
+        root=str(data_dir),
+        train=True,
+        download=config.download,
+        transform=eval_transform,
     )
     test_dataset = dataset_cls(
         root=str(data_dir),
         train=False,
         download=config.download,
-        transform=transform,
+        transform=eval_transform,
     )
 
     reference_dataset = make_balanced_reference_dataset(
-        train_dataset,
+        reference_source_dataset,
         size=config.reference_size,
         seed=config.seed,
     )
@@ -400,6 +406,34 @@ def _dataset_class(datasets, dataset: str):
         return datasets.MNIST
     if token == "fashion_mnist":
         return datasets.FashionMNIST
+    if token == "cifar10":
+        return datasets.CIFAR10
+    supported = ", ".join(sorted(SUPPORTED_DATASETS))
+    raise ValueError(f"Unsupported dataset '{dataset}'. Expected one of: {supported}.")
+
+
+def _dataset_transforms(transforms, dataset: str):
+    """Return train and deterministic evaluation transforms for a dataset."""
+
+    token = _dataset_token(dataset)
+    if token in {"mnist", "fashion_mnist"}:
+        transform = transforms.ToTensor()
+        return transform, transform
+    if token == "cifar10":
+        normalize = transforms.Normalize(
+            mean=(0.4914, 0.4822, 0.4465),
+            std=(0.2470, 0.2435, 0.2616),
+        )
+        train_transform = transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        )
+        eval_transform = transforms.Compose([transforms.ToTensor(), normalize])
+        return train_transform, eval_transform
     supported = ", ".join(sorted(SUPPORTED_DATASETS))
     raise ValueError(f"Unsupported dataset '{dataset}'. Expected one of: {supported}.")
 
