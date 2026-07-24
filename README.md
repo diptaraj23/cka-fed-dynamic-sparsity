@@ -2,7 +2,7 @@
 
 ## Research Objective
 
-This repository is a research prototype for simulated federated learning on MNIST under non-IID client data. The goal is to compare dense, fixed-sparse, dynamic-sparse, and representation-guided sparse training methods in a controlled PyTorch codebase.
+This repository is a research prototype for simulated federated learning on MNIST and Fashion-MNIST under non-IID client data. The goal is to compare dense, fixed-sparse, dynamic-sparse, and representation-guided sparse training methods in a controlled PyTorch codebase.
 
 The proposed direction is to use layer-wise client representation similarity, measured with linear Centered Kernel Alignment (CKA), to guide how sparsity is allocated across layers during dynamic sparse federated learning.
 
@@ -36,7 +36,7 @@ This project currently supports four methods:
 
 ## Dataset and Non-IID Setup
 
-Experiments use MNIST through `torchvision`.
+Experiments use MNIST and Fashion-MNIST through `torchvision`.
 
 Training data is split across simulated clients using Dirichlet label-skew partitioning:
 
@@ -46,7 +46,7 @@ Training data is split across simulated clients using Dirichlet label-skew parti
 - `seed` controls deterministic partitioning
 
 The test set remains global and is used only for evaluation. A small balanced
-reference set is reserved from the MNIST training split for CKA computation, and
+reference set is reserved from the active dataset's training split for CKA computation, and
 those reference examples are excluded from client training. Each run saves the
 exact client/reference indices as a split manifest for reproducibility.
 
@@ -105,9 +105,10 @@ These targets are passed into the FedDST pruning and regrowth step.
 
 ## How to Run Experiments
 
-Experiments are configured with YAML files. Shared settings live in
-`configs/global.yaml`; method-specific files only contain values that differ
-from the shared setup.
+Experiments are configured with YAML files. Shared MNIST settings live in
+`configs/global.yaml`; Fashion-MNIST settings live in
+`configs/global_fashion_mnist.yaml`. Method-specific files only contain values
+that differ from the shared setup and can be reused across both datasets.
 
 Run a single method:
 
@@ -137,6 +138,14 @@ Command-line arguments override YAML values only when explicitly provided:
 
 ```bash
 python -m src.train --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.9
+```
+
+Run the same method on Fashion-MNIST by selecting the Fashion-MNIST global
+config:
+
+```bash
+python -m src.train --global_config configs/global_fashion_mnist.yaml --config configs/fedavg_mnist.yaml
+python -m src.train --global_config configs/global_fashion_mnist.yaml --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.8
 ```
 
 Run the main sparsity sweep. This runs dense FedAvg once, then Sparse FedAvg,
@@ -171,6 +180,14 @@ Preview a suite without launching training:
 
 ```bash
 python experiments/run_experiment.py --suite all --dry_run
+```
+
+Run Fashion-MNIST experiment suites with the same runner:
+
+```bash
+python experiments/run_experiment.py --dataset fashion_mnist --dry_run
+python experiments/run_experiment.py --dataset fashion_mnist --suite multiseed
+python experiments/run_experiment.py --dataset fashion_mnist --suite cka_strength
 ```
 
 Aggregate raw logs into reusable mean/std CSV files:
@@ -319,7 +336,7 @@ This is a research prototype, not a final benchmark suite.
 Current limitations:
 
 - experiments are simulated on one machine
-- only MNIST is fully wired into the data pipeline
+- MNIST and Fashion-MNIST are supported, but CIFAR-10 and larger datasets are not yet implemented
 - the model is a small CNN
 - client selection is currently full participation
 - hyperparameters are simple defaults, not tuned
@@ -341,7 +358,6 @@ python -m unittest discover -s tests
 
 Planned extensions:
 
-- add Fashion-MNIST experiments
 - add CIFAR-10 experiments
 - add ResNet-style models
 - scale to more clients
@@ -362,7 +378,7 @@ results/
   plots/                 Generated figures
 archive/                 Tracked older experiment artifacts kept separate
 src/
-  data.py                MNIST loading and non-IID partitioning
+  data.py                MNIST/Fashion-MNIST loading and non-IID partitioning
   models.py              SmallCNN model definition
   federated.py           FedAvg, Sparse FedAvg, FedDST, CKA-FedDST loops
   sparsity.py            Mask creation and sparsity utilities
