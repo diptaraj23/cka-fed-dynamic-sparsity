@@ -1,0 +1,4173 @@
+Host: iris-195
+Started: Fri Jul 24 14:58:35 UTC 2026
+Python 3.11.15
+Torch: 2.11.0+cu130
+CUDA: True
+Tesla V100-SXM2-32GB
+Suite: multiseed
+Dataset: cifar10
+Suite id: cifar10_multiseed_20260724_145839
+Planned runs: 80
+Seeds: 7 13 21 42 100
+Sparsities: 0.5 0.7 0.8 0.9 0.95
+
+[Run 1/80] suite=multiseed method=fedavg seed=42 sparsity=dense cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml --seed 42 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 1
+method: fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.0
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/fedavg_cifar10_clients5_alpha0.3_seed42_20260724_145840_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 2/80] suite=multiseed method=sparse_fedavg seed=42 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 42 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.5_seed42_20260724_145848_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 3/80] suite=multiseed method=feddst seed=42 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 42 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/feddst_cifar10_clients5_alpha0.3_sparsity0.5_seed42_20260724_145854_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 4/80] suite=multiseed method=cka_feddst seed=42 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 42 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.5_cka0.2_seed42_20260724_145859_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 5/80] suite=multiseed method=sparse_fedavg seed=42 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 42 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.7_seed42_20260724_145905_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 6/80] suite=multiseed method=feddst seed=42 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 42 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/feddst_cifar10_clients5_alpha0.3_sparsity0.7_seed42_20260724_145911_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 7/80] suite=multiseed method=cka_feddst seed=42 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 42 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.7_cka0.2_seed42_20260724_145916_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 8/80] suite=multiseed method=sparse_fedavg seed=42 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 42 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.8_seed42_20260724_145922_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 9/80] suite=multiseed method=feddst seed=42 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 42 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/feddst_cifar10_clients5_alpha0.3_sparsity0.8_seed42_20260724_145927_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 10/80] suite=multiseed method=cka_feddst seed=42 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 42 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.8_cka0.2_seed42_20260724_145933_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 11/80] suite=multiseed method=sparse_fedavg seed=42 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 42 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.9_seed42_20260724_145939_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 12/80] suite=multiseed method=feddst seed=42 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 42 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/feddst_cifar10_clients5_alpha0.3_sparsity0.9_seed42_20260724_145944_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 13/80] suite=multiseed method=cka_feddst seed=42 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 42 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.9_cka0.2_seed42_20260724_145950_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 14/80] suite=multiseed method=sparse_fedavg seed=42 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 42 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.95_seed42_20260724_145956_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 15/80] suite=multiseed method=feddst seed=42 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 42 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/feddst_cifar10_clients5_alpha0.3_sparsity0.95_seed42_20260724_150001_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 16/80] suite=multiseed method=cka_feddst seed=42 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 42 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_42
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 42
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_42/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.95_cka0.2_seed42_20260724_150007_config.yaml
+Client label distributions:
+  client 00: n= 6173, labels=[449, 1577, 16, 53, 288, 1254, 18, 319, 1561, 638]
+  client 01: n= 6712, labels=[388, 41, 1016, 674, 619, 293, 705, 1884, 2, 1090]
+  client 02: n= 6610, labels=[14, 2050, 564, 1192, 934, 206, 33, 1318, 147, 152]
+  client 03: n=12351, labels=[4094, 1282, 465, 1114, 4, 0, 3603, 1424, 313, 52]
+  client 04: n=17654, labels=[5, 0, 2889, 1917, 3105, 3197, 591, 5, 2927, 3018]
+
+[Run 17/80] suite=multiseed method=fedavg seed=7 sparsity=dense cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml --seed 7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 1
+method: fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.0
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/fedavg_cifar10_clients5_alpha0.3_seed7_20260724_150013_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 18/80] suite=multiseed method=sparse_fedavg seed=7 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 7 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.5_seed7_20260724_150018_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 19/80] suite=multiseed method=feddst seed=7 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 7 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/feddst_cifar10_clients5_alpha0.3_sparsity0.5_seed7_20260724_150024_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 20/80] suite=multiseed method=cka_feddst seed=7 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 7 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.5_cka0.2_seed7_20260724_150030_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 21/80] suite=multiseed method=sparse_fedavg seed=7 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 7 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.7_seed7_20260724_150035_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 22/80] suite=multiseed method=feddst seed=7 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 7 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/feddst_cifar10_clients5_alpha0.3_sparsity0.7_seed7_20260724_150041_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 23/80] suite=multiseed method=cka_feddst seed=7 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 7 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.7_cka0.2_seed7_20260724_150047_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 24/80] suite=multiseed method=sparse_fedavg seed=7 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 7 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.8_seed7_20260724_150052_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 25/80] suite=multiseed method=feddst seed=7 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 7 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/feddst_cifar10_clients5_alpha0.3_sparsity0.8_seed7_20260724_150058_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 26/80] suite=multiseed method=cka_feddst seed=7 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 7 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.8_cka0.2_seed7_20260724_150104_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 27/80] suite=multiseed method=sparse_fedavg seed=7 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 7 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.9_seed7_20260724_150109_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 28/80] suite=multiseed method=feddst seed=7 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 7 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/feddst_cifar10_clients5_alpha0.3_sparsity0.9_seed7_20260724_150115_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 29/80] suite=multiseed method=cka_feddst seed=7 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 7 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.9_cka0.2_seed7_20260724_150120_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 30/80] suite=multiseed method=sparse_fedavg seed=7 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 7 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.95_seed7_20260724_150126_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 31/80] suite=multiseed method=feddst seed=7 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 7 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/feddst_cifar10_clients5_alpha0.3_sparsity0.95_seed7_20260724_150132_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 32/80] suite=multiseed method=cka_feddst seed=7 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 7 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_7
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 7
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_7/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.95_cka0.2_seed7_20260724_150138_config.yaml
+Client label distributions:
+  client 00: n= 7681, labels=[142, 16, 5, 202, 411, 2130, 3884, 876, 12, 3]
+  client 01: n= 8711, labels=[1321, 1281, 355, 76, 3165, 8, 25, 0, 1922, 558]
+  client 02: n=19320, labels=[2810, 141, 3133, 4649, 1064, 2142, 26, 2148, 2915, 292]
+  client 03: n= 5169, labels=[22, 3285, 1093, 5, 3, 639, 18, 41, 63, 0]
+  client 04: n= 8619, labels=[655, 227, 364, 18, 307, 31, 997, 1885, 38, 4097]
+
+[Run 33/80] suite=multiseed method=fedavg seed=13 sparsity=dense cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml --seed 13 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 1
+method: fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.0
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/fedavg_cifar10_clients5_alpha0.3_seed13_20260724_150143_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 34/80] suite=multiseed method=sparse_fedavg seed=13 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 13 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.5_seed13_20260724_150149_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 35/80] suite=multiseed method=feddst seed=13 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 13 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/feddst_cifar10_clients5_alpha0.3_sparsity0.5_seed13_20260724_150155_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 36/80] suite=multiseed method=cka_feddst seed=13 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 13 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.5_cka0.2_seed13_20260724_150201_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 37/80] suite=multiseed method=sparse_fedavg seed=13 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 13 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.7_seed13_20260724_150207_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 38/80] suite=multiseed method=feddst seed=13 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 13 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/feddst_cifar10_clients5_alpha0.3_sparsity0.7_seed13_20260724_150212_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 39/80] suite=multiseed method=cka_feddst seed=13 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 13 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.7_cka0.2_seed13_20260724_150218_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 40/80] suite=multiseed method=sparse_fedavg seed=13 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 13 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.8_seed13_20260724_150224_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 41/80] suite=multiseed method=feddst seed=13 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 13 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/feddst_cifar10_clients5_alpha0.3_sparsity0.8_seed13_20260724_150230_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 42/80] suite=multiseed method=cka_feddst seed=13 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 13 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.8_cka0.2_seed13_20260724_150235_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 43/80] suite=multiseed method=sparse_fedavg seed=13 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 13 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.9_seed13_20260724_150241_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 44/80] suite=multiseed method=feddst seed=13 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 13 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/feddst_cifar10_clients5_alpha0.3_sparsity0.9_seed13_20260724_150247_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 45/80] suite=multiseed method=cka_feddst seed=13 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 13 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.9_cka0.2_seed13_20260724_150252_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 46/80] suite=multiseed method=sparse_fedavg seed=13 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 13 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.95_seed13_20260724_150258_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 47/80] suite=multiseed method=feddst seed=13 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 13 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/feddst_cifar10_clients5_alpha0.3_sparsity0.95_seed13_20260724_150304_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 48/80] suite=multiseed method=cka_feddst seed=13 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 13 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_13
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 13
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_13/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.95_cka0.2_seed13_20260724_150309_config.yaml
+Client label distributions:
+  client 00: n=19994, labels=[2952, 878, 4230, 1942, 3893, 2947, 1170, 1268, 17, 697]
+  client 01: n= 5273, labels=[1186, 629, 719, 163, 777, 852, 428, 22, 488, 9]
+  client 02: n= 7607, labels=[2, 105, 1, 0, 96, 68, 60, 1042, 2038, 4195]
+  client 03: n= 4678, labels=[463, 27, 0, 654, 2, 62, 287, 776, 2407, 0]
+  client 04: n=11948, labels=[347, 3311, 0, 2191, 182, 1021, 3005, 1842, 0, 49]
+
+[Run 49/80] suite=multiseed method=fedavg seed=21 sparsity=dense cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml --seed 21 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 1
+method: fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.0
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/fedavg_cifar10_clients5_alpha0.3_seed21_20260724_150315_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 50/80] suite=multiseed method=sparse_fedavg seed=21 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 21 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.5_seed21_20260724_150321_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 51/80] suite=multiseed method=feddst seed=21 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 21 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/feddst_cifar10_clients5_alpha0.3_sparsity0.5_seed21_20260724_150326_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 52/80] suite=multiseed method=cka_feddst seed=21 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 21 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.5_cka0.2_seed21_20260724_150332_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 53/80] suite=multiseed method=sparse_fedavg seed=21 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 21 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.7_seed21_20260724_150338_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 54/80] suite=multiseed method=feddst seed=21 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 21 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/feddst_cifar10_clients5_alpha0.3_sparsity0.7_seed21_20260724_150343_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 55/80] suite=multiseed method=cka_feddst seed=21 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 21 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.7_cka0.2_seed21_20260724_150349_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 56/80] suite=multiseed method=sparse_fedavg seed=21 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 21 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.8_seed21_20260724_150355_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 57/80] suite=multiseed method=feddst seed=21 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 21 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/feddst_cifar10_clients5_alpha0.3_sparsity0.8_seed21_20260724_150400_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 58/80] suite=multiseed method=cka_feddst seed=21 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 21 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.8_cka0.2_seed21_20260724_150406_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 59/80] suite=multiseed method=sparse_fedavg seed=21 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 21 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.9_seed21_20260724_150412_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 60/80] suite=multiseed method=feddst seed=21 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 21 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/feddst_cifar10_clients5_alpha0.3_sparsity0.9_seed21_20260724_150417_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 61/80] suite=multiseed method=cka_feddst seed=21 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 21 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.9_cka0.2_seed21_20260724_150423_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 62/80] suite=multiseed method=sparse_fedavg seed=21 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 21 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.95_seed21_20260724_150428_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 63/80] suite=multiseed method=feddst seed=21 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 21 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/feddst_cifar10_clients5_alpha0.3_sparsity0.95_seed21_20260724_150434_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 64/80] suite=multiseed method=cka_feddst seed=21 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 21 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_21
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 21
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_21/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.95_cka0.2_seed21_20260724_150440_config.yaml
+Client label distributions:
+  client 00: n=10151, labels=[68, 0, 4345, 758, 1058, 713, 0, 122, 882, 2205]
+  client 01: n=10420, labels=[957, 2155, 26, 376, 2359, 483, 4054, 4, 6, 0]
+  client 02: n= 7384, labels=[1406, 266, 313, 764, 191, 13, 184, 2, 3127, 1118]
+  client 03: n=13329, labels=[2519, 2506, 245, 1146, 1341, 359, 6, 3254, 563, 1390]
+  client 04: n= 8216, labels=[0, 23, 21, 1906, 1, 3382, 706, 1568, 372, 237]
+
+[Run 65/80] suite=multiseed method=fedavg seed=100 sparsity=dense cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml --seed 100 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 1
+method: fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.0
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/fedavg_cifar10_clients5_alpha0.3_seed100_20260724_150445_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 66/80] suite=multiseed method=sparse_fedavg seed=100 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 100 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.5_seed100_20260724_150451_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 67/80] suite=multiseed method=feddst seed=100 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 100 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/feddst_cifar10_clients5_alpha0.3_sparsity0.5_seed100_20260724_150457_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 68/80] suite=multiseed method=cka_feddst seed=100 sparsity=0.5 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 100 --sparsity 0.5 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.5
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.5_cka0.2_seed100_20260724_150503_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 69/80] suite=multiseed method=sparse_fedavg seed=100 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 100 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.7_seed100_20260724_150508_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 70/80] suite=multiseed method=feddst seed=100 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 100 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/feddst_cifar10_clients5_alpha0.3_sparsity0.7_seed100_20260724_150514_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 71/80] suite=multiseed method=cka_feddst seed=100 sparsity=0.7 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 100 --sparsity 0.7 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.7
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.7_cka0.2_seed100_20260724_150520_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 72/80] suite=multiseed method=sparse_fedavg seed=100 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 100 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.8_seed100_20260724_150526_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 73/80] suite=multiseed method=feddst seed=100 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 100 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/feddst_cifar10_clients5_alpha0.3_sparsity0.8_seed100_20260724_150532_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 74/80] suite=multiseed method=cka_feddst seed=100 sparsity=0.8 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 100 --sparsity 0.8 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.8
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.8_cka0.2_seed100_20260724_150537_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 75/80] suite=multiseed method=sparse_fedavg seed=100 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 100 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.9_seed100_20260724_150543_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 76/80] suite=multiseed method=feddst seed=100 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 100 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/feddst_cifar10_clients5_alpha0.3_sparsity0.9_seed100_20260724_150549_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 77/80] suite=multiseed method=cka_feddst seed=100 sparsity=0.9 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 100 --sparsity 0.9 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.9
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.9_cka0.2_seed100_20260724_150555_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 78/80] suite=multiseed method=sparse_fedavg seed=100 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/sparse_fedavg_mnist.yaml --seed 100 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/sparse_fedavg_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 1
+method: sparse_fedavg
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.1
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/sparse_fedavg_cifar10_clients5_alpha0.3_sparsity0.95_seed100_20260724_150600_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 79/80] suite=multiseed method=feddst seed=100 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/feddst_mnist.yaml --seed 100 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 1
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.99
+cka_min_sparsity: 0.0
+cka_strength: 0.5
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/feddst_cifar10_clients5_alpha0.3_sparsity0.95_seed100_20260724_150606_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+
+[Run 80/80] suite=multiseed method=cka_feddst seed=100 sparsity=0.95 cka_strength=yaml
+Output log dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+Command: /mnt/aiongpfs/users/dsen/micromamba/envs/cka-cifar/bin/python -m src.train --global-config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --seed 100 --sparsity 0.95 --log-dir results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100 --checkpoint-dir results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100 --plot-dir results/plots/multiseed/cifar10_multiseed_20260724_145839
+Final merged configuration:
+alpha: 0.3
+batch_size: 64
+checkpoint_dir: results/checkpoints/multiseed/cifar10_multiseed_20260724_145839/seed_100
+cka_interval: 2
+cka_layers:
+- conv1
+- conv2
+- conv3
+- fc1
+cka_max_sparsity: 0.95
+cka_min_sparsity: 0.5
+cka_strength: 0.2
+data_check: false
+data_dir: data
+dataset: cifar10
+device: auto
+dry_run: false
+eval_interval: 1
+experiment_config_path: configs/cka_feddst_mnist.yaml
+global_config_path: configs/global_cifar10.yaml
+local_epochs: 1
+log_cka: false
+log_dir: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100
+lr: 0.01
+mask_update_interval: 2
+method: cka_feddst
+model: cifar_cnn
+num_clients: 5
+num_workers: 2
+output_dir: results
+plot_dir: results/plots/multiseed/cifar10_multiseed_20260724_145839
+prune_fraction: 0.2
+reference_size: 500
+regrowth_method: gradient
+rounds: 20
+save_checkpoint: false
+seed: 100
+sparsity: 0.95
+sparsity_init: random
+split_dir: null
+Saved merged config to: results/logs/multiseed/cifar10_multiseed_20260724_145839/seed_100/cka_feddst_cifar10_clients5_alpha0.3_sparsity0.95_cka0.2_seed100_20260724_150612_config.yaml
+Client label distributions:
+  client 00: n= 6485, labels=[2604, 0, 589, 2, 2, 5, 173, 2831, 8, 271]
+  client 01: n= 9836, labels=[30, 0, 237, 3053, 347, 2329, 15, 2008, 2, 1815]
+  client 02: n= 9670, labels=[180, 2324, 0, 407, 463, 481, 1656, 64, 4094, 1]
+  client 03: n= 6110, labels=[2074, 92, 1, 1395, 1095, 27, 832, 24, 30, 540]
+  client 04: n=17399, labels=[62, 2534, 4123, 93, 3043, 2108, 2274, 23, 816, 2323]
+Finished multiseed: Fri Jul 24 15:06:16 UTC 2026
