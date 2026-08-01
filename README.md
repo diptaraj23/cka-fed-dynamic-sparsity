@@ -18,6 +18,19 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
+The requirements pin PyTorch/Torchvision to CUDA 11.8 wheels so the same
+environment works on V100 GPUs used by the HPC runs. On an HPC GPU node, verify
+the environment before launching long jobs:
+
+```bash
+export PYTHONNOUSERSITE=1
+python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.is_available())"
+```
+
+Expected PyTorch should include `+cu118`, and `torch.version.cuda` should print
+`11.8`. Avoid reinstalling unpinned Torch builds after this, because CUDA 13
+wheels do not support V100 compute capability 7.0.
+
 ## Methods Compared
 
 This project currently supports four methods:
