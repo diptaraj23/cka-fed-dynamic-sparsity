@@ -20,6 +20,7 @@ DEFAULT_CONFIG = {
     "seed": 0,
     "alpha": 0.5,
     "device": "auto",
+    "disable_cudnn": False,
     "data_dir": "data",
     "output_dir": "results",
     "log_dir": "results/logs",

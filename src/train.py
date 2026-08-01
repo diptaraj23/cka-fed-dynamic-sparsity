@@ -69,6 +69,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--alpha", type=float, default=None)
     parser.add_argument("--device", default=None)
+    parser.add_argument(
+        "--disable-cudnn",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Disable cuDNN kernels. Useful on HPC GPU builds with cuDNN engine issues.",
+    )
     parser.add_argument("--data-dir", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--log-dir", type=Path, default=None)
@@ -235,6 +241,9 @@ def make_dst_config(config: dict) -> DSTConfig:
 def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
     """Run the configured federated learning method."""
     seed_everything(int(config["seed"]))
+    if bool(config.get("disable_cudnn", False)):
+        torch.backends.cudnn.enabled = False
+        print("cuDNN disabled for this run.")
     data_config = make_data_config(config)
     client_loaders, test_loader, reference_loader = load_federated_data(data_config)
     if bool(config.get("data_check", False)):

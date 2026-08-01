@@ -31,6 +31,10 @@ Expected PyTorch should include `+cu118`, and `torch.version.cuda` should print
 `11.8`. Avoid reinstalling unpinned Torch builds after this, because CUDA 13
 wheels do not support V100 compute capability 7.0.
 
+For CIFAR-10, `configs/global_cifar10.yaml` also sets `disable_cudnn: true`.
+This avoids cuDNN convolution-engine failures observed on V100 nodes while
+still running the model on CUDA.
+
 ## Methods Compared
 
 This project currently supports four methods:
