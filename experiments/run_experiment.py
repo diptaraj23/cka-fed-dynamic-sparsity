@@ -38,6 +38,7 @@ MANIFEST_COLUMNS = (
     "seed",
     "sparsity",
     "cka_strength",
+    "cka_signal",
     "global_config",
     "config",
     "log_dir",
@@ -60,6 +61,7 @@ class RunSpec:
     seed: int
     sparsity: float | None = None
     cka_strength: float | None = None
+    cka_signal: str | None = None
     log_dir: Path | None = None
     checkpoint_dir: Path | None = None
     plot_dir: Path | None = None
@@ -126,6 +128,12 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         default=list(DEFAULT_CKA_STRENGTHS),
         help="CKA-strength values for the CKA-strength suite.",
+    )
+    parser.add_argument(
+        "--cka-signal",
+        choices=("similarity", "drift"),
+        default=None,
+        help="Optional CKA-FedDST signal mode override.",
     )
     parser.add_argument(
         "--continue_on_error",
@@ -273,6 +281,7 @@ def build_sparsity_specs(args: argparse.Namespace, suite_id: str) -> list[RunSpe
                     config_path=CONFIGS[method],
                     seed=42,
                     sparsity=sparsity,
+                    cka_signal=args.cka_signal if method == "cka_feddst" else None,
                 )
             )
     return specs
@@ -317,6 +326,7 @@ def build_multiseed_specs(args: argparse.Namespace, suite_id: str) -> list[RunSp
                         config_path=CONFIGS[method],
                         seed=seed,
                         sparsity=sparsity,
+                        cka_signal=args.cka_signal if method == "cka_feddst" else None,
                         log_dir=log_dir,
                         checkpoint_dir=checkpoint_dir,
                         plot_dir=plot_dir,
@@ -361,6 +371,7 @@ def build_cka_strength_specs(args: argparse.Namespace, suite_id: str) -> list[Ru
                         seed=seed,
                         sparsity=sparsity,
                         cka_strength=strength,
+                        cka_signal=args.cka_signal,
                         log_dir=log_dir,
                         checkpoint_dir=checkpoint_dir,
                         plot_dir=plot_dir,
@@ -388,6 +399,8 @@ def build_command(spec: RunSpec) -> list[str]:
         command.extend(["--sparsity", format_float(spec.sparsity)])
     if spec.cka_strength is not None:
         command.extend(["--cka-strength", format_float(spec.cka_strength)])
+    if spec.cka_signal is not None:
+        command.extend(["--cka-signal", spec.cka_signal])
     if spec.log_dir is not None:
         command.extend(["--log-dir", str(spec.log_dir)])
     if spec.checkpoint_dir is not None:
@@ -415,6 +428,7 @@ def build_manifest_rows(specs: list[RunSpec]) -> list[dict]:
                 "cka_strength": (
                     "" if spec.cka_strength is None else format_float(spec.cka_strength)
                 ),
+                "cka_signal": "" if spec.cka_signal is None else spec.cka_signal,
                 "global_config": str(spec.global_config_path),
                 "config": str(spec.config_path),
                 "log_dir": "" if spec.log_dir is None else str(spec.log_dir),

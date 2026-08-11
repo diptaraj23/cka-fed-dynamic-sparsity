@@ -138,6 +138,69 @@ def cka_scores_to_layer_sparsities(
     other sparse layers keep their existing active-count budget in FedDST.
     """
 
+    return signal_scores_to_layer_sparsities(
+        masks=masks,
+        signal_scores=cka_scores,
+        base_sparsity=base_sparsity,
+        strength=strength,
+        min_sparsity=min_sparsity,
+        max_sparsity=max_sparsity,
+    )
+
+
+def cka_scores_to_signal_scores(
+    cka_scores: dict[str, float],
+    signal: str = "similarity",
+) -> dict[str, float]:
+    """Orient CKA scores so larger values mean a layer should stay denser."""
+
+    if signal == "similarity":
+        return {layer: float(value) for layer, value in cka_scores.items()}
+    if signal == "drift":
+        return {
+            layer: 1.0 - max(0.0, min(1.0, float(value)))
+            for layer, value in cka_scores.items()
+        }
+    raise ValueError("cka_signal must be 'similarity' or 'drift'.")
+
+
+def cka_signal_to_layer_sparsities(
+    masks: dict[str, torch.Tensor],
+    cka_scores: dict[str, float],
+    base_sparsity: float,
+    signal: str = "similarity",
+    strength: float = 0.5,
+    min_sparsity: float = 0.0,
+    max_sparsity: float = 0.99,
+) -> tuple[dict[str, float], dict[str, float]]:
+    """Convert raw CKA scores into signal scores and layer sparsity targets."""
+
+    signal_scores = cka_scores_to_signal_scores(cka_scores, signal)
+    layer_targets = signal_scores_to_layer_sparsities(
+        masks=masks,
+        signal_scores=signal_scores,
+        base_sparsity=base_sparsity,
+        strength=strength,
+        min_sparsity=min_sparsity,
+        max_sparsity=max_sparsity,
+    )
+    return layer_targets, signal_scores
+
+
+def signal_scores_to_layer_sparsities(
+    masks: dict[str, torch.Tensor],
+    signal_scores: dict[str, float],
+    base_sparsity: float,
+    strength: float = 0.5,
+    min_sparsity: float = 0.0,
+    max_sparsity: float = 0.99,
+) -> dict[str, float]:
+    """Convert oriented layer scores into layer-wise sparsity targets.
+
+    Higher signal values receive more active weights, which means lower
+    sparsity. Only layers with measured signal scores receive adaptive targets.
+    """
+
     if not masks:
         return {}
     if not 0.0 <= base_sparsity < 1.0:
@@ -149,7 +212,7 @@ def cka_scores_to_layer_sparsities(
 
     names = [
         name for name in masks
-        if _activation_name(name) in cka_scores
+        if _activation_name(name) in signal_scores
     ]
     if not names:
         return {}
@@ -171,7 +234,7 @@ def cka_scores_to_layer_sparsities(
     )
 
     scores = {
-        name: float(cka_scores.get(_activation_name(name), 0.5))
+        name: float(signal_scores.get(_activation_name(name), 0.5))
         for name in names
     }
     mean_score = sum(scores.values()) / len(scores)

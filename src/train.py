@@ -31,6 +31,7 @@ from src.utils import save_csv, seed_everything
 
 
 METHODS = ("fedavg", "sparse_fedavg", "feddst", "cka_feddst")
+CKA_SIGNALS = ("similarity", "drift")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -108,6 +109,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cka-min-sparsity", type=float, default=None)
     parser.add_argument("--cka-max-sparsity", type=float, default=None)
     parser.add_argument("--cka-strength", type=float, default=None)
+    parser.add_argument("--cka-signal", choices=CKA_SIGNALS, default=None)
     parser.add_argument(
         "--cka-target-strength",
         dest="cka_strength",
@@ -141,6 +143,8 @@ def make_run_name(config: dict) -> str:
         parts.append(f"sparsity{config.get('sparsity', 0.0)}")
     if str(config["method"]) == "cka_feddst":
         parts.append(f"cka{config.get('cka_strength', 'NA')}")
+        if str(config.get("cka_signal", "similarity")) != "similarity":
+            parts.append(str(config["cka_signal"]))
     parts.extend(
         [
             f"seed{config['seed']}",
@@ -308,6 +312,7 @@ def run_experiment(config: dict, paths: dict[str, Path]) -> list[dict]:
             cka_layers=cka_layers,
             cka_min_sparsity=float(config["cka_min_sparsity"]),
             cka_max_sparsity=float(config["cka_max_sparsity"]),
+            cka_signal=str(config.get("cka_signal", "similarity")),
             cka_log_path=cka_log_path,
             run_metadata=run_metadata,
         )
@@ -344,6 +349,11 @@ def base_log_metadata(config: dict) -> dict:
         "split_manifest_path": str(config.get("split_manifest_path", "")),
         "cka_strength": (
             float(config["cka_strength"])
+            if str(config["method"]) == "cka_feddst"
+            else ""
+        ),
+        "cka_signal": (
+            str(config.get("cka_signal", "similarity"))
             if str(config["method"]) == "cka_feddst"
             else ""
         ),

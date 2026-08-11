@@ -1,0 +1,11 @@
+method: cka_feddst
+sparsity: 0.8
+sparsity_init: random
+mask_update_interval: 2
+prune_fraction: 0.2
+regrowth_method: gradient
+cka_interval: 2
+cka_min_sparsity: 0.5
+cka_max_sparsity: 0.95
+cka_strength: 0.2
+cka_signal: drift

@@ -41,6 +41,7 @@ DEFAULT_CONFIG = {
     "cka_min_sparsity": 0.0,
     "cka_max_sparsity": 0.99,
     "cka_strength": 0.5,
+    "cka_signal": "similarity",
     "log_cka": False,
 }
 

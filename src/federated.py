@@ -18,7 +18,7 @@ from .evaluate import evaluate_model
 from .sparsity import (
     SparsityConfig,
     apply_masks,
-    cka_scores_to_layer_sparsities,
+    cka_signal_to_layer_sparsities,
     create_masks,
     format_layer_sparsity,
     format_layer_values,
@@ -464,6 +464,7 @@ def run_cka_feddst(
     cka_layers: tuple[str, ...] = DEFAULT_CKA_LAYERS,
     cka_min_sparsity: float = 0.0,
     cka_max_sparsity: float = 0.99,
+    cka_signal: str = "similarity",
     cka_log_path=None,
     run_metadata: dict | None = None,
 ):
@@ -475,6 +476,7 @@ def run_cka_feddst(
         cka_target_strength,
         cka_min_sparsity,
         cka_max_sparsity,
+        cka_signal,
     )
     seed_everything(config.seed)
 
@@ -498,6 +500,7 @@ def run_cka_feddst(
     logs = []
     cka_rows = []
     latest_cka_scores = {}
+    latest_signal_scores = {}
     layer_targets = {}
     cka_layer_names = cka_layers
     sparse_layer_names = tuple(masks)
@@ -530,10 +533,11 @@ def run_cka_feddst(
 
         if cka_result is not None:
             latest_cka_scores = average_cka_scores(cka_result)
-            layer_targets = cka_scores_to_layer_sparsities(
+            layer_targets, latest_signal_scores = cka_signal_to_layer_sparsities(
                 masks=masks,
                 cka_scores=latest_cka_scores,
                 base_sparsity=sparsity_config.target_sparsity,
+                signal=cka_signal,
                 strength=cka_target_strength,
                 min_sparsity=cka_min_sparsity,
                 max_sparsity=cka_max_sparsity,
@@ -576,10 +580,13 @@ def run_cka_feddst(
             "total_params": summary["total_params"],
             "layer_sparsity": format_layer_sparsity(summary["layer_sparsity"]),
             "layer_cka": format_layer_values(latest_cka_scores),
+            "layer_signal": format_layer_values(latest_signal_scores),
             "layer_target_sparsity": format_layer_sparsity(layer_targets),
+            "cka_signal": cka_signal,
         }
         row.update(_layer_sparsity_columns(summary["layer_sparsity"]))
         row.update(_layer_value_columns("cka", latest_cka_scores, cka_layer_names))
+        row.update(_layer_value_columns("signal", latest_signal_scores, cka_layer_names))
         row.update(
             _layer_value_columns(
                 "target_sparsity",
@@ -596,6 +603,7 @@ def run_cka_feddst(
             f"test_acc={_format_metric(metrics['accuracy'])} | "
             f"sparsity={summary['total_sparsity']:.4f} | "
             f"cka={int(should_compute_cka)} | "
+            f"signal={cka_signal} | "
             f"targets={format_layer_sparsity(layer_targets)}"
         )
 
@@ -650,6 +658,7 @@ def _validate_cka_config(
     cka_target_strength: float,
     cka_min_sparsity: float = 0.0,
     cka_max_sparsity: float = 0.99,
+    cka_signal: str = "similarity",
 ) -> None:
     """Validate CKA-guided sparse training settings."""
 
@@ -661,6 +670,8 @@ def _validate_cka_config(
         raise ValueError(
             "Expected 0.0 <= cka_min_sparsity <= cka_max_sparsity < 1.0."
         )
+    if cka_signal not in {"similarity", "drift"}:
+        raise ValueError("cka_signal must be 'similarity' or 'drift'.")
 
 
 def _layer_sparsity_columns(layer_sparsity: dict[str, float]) -> dict[str, float]:
