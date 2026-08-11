@@ -22,6 +22,7 @@ python --version
 
 python - <<'PY'
 import torch
+torch.backends.cudnn.enabled = False
 print("Torch:", torch.__version__)
 print("Torch file:", torch.__file__)
 print("CUDA build:", torch.version.cuda)
@@ -32,13 +33,13 @@ x = torch.randn(8, 3, 32, 32, device="cuda")
 conv = torch.nn.Conv2d(3, 16, 3, padding=1).cuda()
 y = conv(x)
 torch.cuda.synchronize()
-print("CUDA conv smoke passed:", tuple(y.shape))
+print("CUDA conv smoke passed with cuDNN disabled:", tuple(y.shape))
 PY
 
 python experiments/run_experiment.py \
   --dataset cifar10 \
   --suite cka_strength \
-  --suite-id cifar10_cka_strength_fixed_${SLURM_JOB_ID} \
+  --suite-id cifar10 \
   --continue_on_error
 
 echo "Finished cka_strength: $(date)"

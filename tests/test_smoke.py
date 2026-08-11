@@ -17,6 +17,7 @@ import torch
 from experiments.run_experiment import build_parser as build_runner_parser
 from experiments.run_experiment import build_command
 from experiments.run_experiment import build_run_specs
+from experiments.run_experiment import make_suite_id
 from src.aggregation import aggregate_results
 from src.cka import linear_cka
 from src.data import (
@@ -223,6 +224,16 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(len(build_run_specs(multiseed_args, "test_suite")), 80)
         self.assertEqual(len(build_run_specs(cka_args, "test_suite")), 125)
         self.assertEqual(len(build_run_specs(all_args, "test_suite")), 205)
+
+    def test_default_suite_ids_include_dataset_name(self) -> None:
+        self.assertRegex(
+            make_suite_id("all", "mnist"),
+            r"^mnist_all_\d{8}_\d{6}$",
+        )
+        self.assertRegex(
+            make_suite_id("multiseed", "cifar10"),
+            r"^cifar10_multiseed_\d{8}_\d{6}$",
+        )
 
     def test_fashion_mnist_runner_uses_fashion_global_config(self) -> None:
         parser = build_runner_parser()

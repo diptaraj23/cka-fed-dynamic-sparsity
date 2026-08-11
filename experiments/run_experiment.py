@@ -479,7 +479,7 @@ def make_suite_id(suite: str, dataset: str = "mnist") -> str:
     """Create a timestamped suite id."""
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    prefix = suite if dataset == "mnist" else f"{dataset}_{suite}"
+    prefix = f"{dataset}_{suite}"
     return safe_token(f"{prefix}_{timestamp}")
 
 

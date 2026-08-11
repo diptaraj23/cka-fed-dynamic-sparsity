@@ -315,13 +315,16 @@ The organized suite runner writes results under timestamped folders, for
 example:
 
 ```text
-results/logs/multiseed/<suite_id>/seed_42/
-results/logs/cka_strength_sweep/<suite_id>/strength_0p8/seed_42/
-results/averaged/multiseed/<suite_id>/
-results/averaged/cka_strength_sweep/<suite_id>/
-results/plots/multiseed/<suite_id>/
-results/plots/cka_strength_sweep/<suite_id>/
+results/logs/multiseed/<dataset>_<suite>_<timestamp>/seed_42/
+results/logs/cka_strength_sweep/<dataset>_<suite>_<timestamp>/strength_0p8/seed_42/
+results/averaged/multiseed/<dataset>_<suite>_<timestamp>/
+results/averaged/cka_strength_sweep/<dataset>_<suite>_<timestamp>/
+results/plots/multiseed/<dataset>_<suite>_<timestamp>/
+results/plots/cka_strength_sweep/<dataset>_<suite>_<timestamp>/
 ```
+
+For curated result snapshots, a shorter suite id such as `cifar10` can be
+passed with `--suite-id`.
 
 Each suite also writes a `manifest.csv` describing the planned command, method,
 seed, sparsity, CKA strength, output folders, and run status.
