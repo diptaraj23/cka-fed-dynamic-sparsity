@@ -117,18 +117,22 @@ The code logs:
 ## CKA-Guided Layer-Wise Sparsity
 
 CKA-guided FedDST computes pairwise client CKA on the shared reference loader every `cka_interval` rounds.
+The `cka_signal` option controls how those CKA values are interpreted:
+
+- `similarity` keeps the original behavior, where high raw CKA receives more active weights
+- `drift` uses `1 - CKA`, where layers with larger representation drift receive more active weights
 
 For each layer:
 
 1. Client models pass the reference data through the network.
 2. Activations from the configured CKA layers are flattened.
 3. Linear CKA is computed pairwise across client models.
-4. The average upper-triangle CKA score is used as the layer similarity score.
+4. The average upper-triangle CKA score is converted into the configured layer signal.
 
 Layer-wise sparsity targets are then adapted:
 
-- high CKA layers receive lower sparsity
-- low CKA layers receive higher sparsity
+- high signal layers receive lower sparsity
+- low signal layers receive higher sparsity
 - the total active parameter budget remains approximately fixed at the base sparsity
 - classifier-only layers such as `fc2` are not assigned CKA-guided targets
 
@@ -166,10 +170,17 @@ Run CKA-guided FedDST:
 python -m src.train --config configs/cka_feddst_mnist.yaml
 ```
 
+Run drift-based CKA-FedDST:
+
+```bash
+python -m src.train --config configs/cka_feddst_drift_mnist.yaml
+```
+
 Command-line arguments override YAML values only when explicitly provided:
 
 ```bash
 python -m src.train --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.9
+python -m src.train --config configs/cka_feddst_mnist.yaml --cka-signal drift
 ```
 
 Run the same method on Fashion-MNIST by selecting the Fashion-MNIST global
@@ -227,6 +238,7 @@ Run CIFAR-10 single-method experiments by selecting the CIFAR-10 global config:
 ```bash
 python -m src.train --global_config configs/global_cifar10.yaml --config configs/fedavg_mnist.yaml
 python -m src.train --global_config configs/global_cifar10.yaml --config configs/cka_feddst_mnist.yaml --rounds 5 --sparsity 0.8
+python -m src.train --global_config configs/global_cifar10.yaml --config configs/cka_feddst_drift_mnist.yaml --dry-run
 ```
 
 Run CIFAR-10 experiment-suite previews with the same runner:
@@ -235,6 +247,7 @@ Run CIFAR-10 experiment-suite previews with the same runner:
 python experiments/run_experiment.py --dataset cifar10 --dry_run
 python experiments/run_experiment.py --dataset cifar10 --suite multiseed --dry_run
 python experiments/run_experiment.py --dataset cifar10 --suite cka_strength --dry_run
+python experiments/run_experiment.py --dataset cifar10 --suite multiseed --methods cka_feddst --cka-signal drift --dry_run
 ```
 
 Aggregate raw logs into reusable mean/std CSV files:
@@ -340,8 +353,9 @@ Logs include, depending on the method:
 - pruned and regrown weights
 - mask changes
 - layer-wise CKA
+- layer-wise configured CKA signal
 - CKA-guided target sparsity
-- run metadata such as method, dataset, sparsity, seed, CKA strength, and split
+- run metadata such as method, dataset, sparsity, seed, CKA strength, CKA signal, and split
   manifest path
 
 Data split manifests are saved under a `splits/` folder inside the active log
