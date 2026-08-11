@@ -30,10 +30,13 @@ from src.data import (
 from src.models import get_model
 from src.sparsity import (
     SparsityConfig,
+    cka_scores_to_signal_scores,
+    cka_signal_to_layer_sparsities,
     cka_scores_to_layer_sparsities,
     create_masks,
     sparsity_summary,
 )
+from src.config import DEFAULT_CONFIG
 from src.plotting import generate_plots_from_averages
 from src.train import build_parser as build_train_parser
 from src.train import load_final_config
@@ -111,6 +114,47 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertIn("fc1.weight", targets)
         self.assertNotIn("fc2.weight", targets)
 
+    def test_similarity_signal_keeps_high_cka_layer_denser(self) -> None:
+        masks = equal_size_signal_masks()
+
+        targets, signals = cka_signal_to_layer_sparsities(
+            masks=masks,
+            cka_scores={"conv1": 0.9, "conv2": 0.6, "fc1": 0.3},
+            base_sparsity=0.8,
+            signal="similarity",
+            strength=1.0,
+            min_sparsity=0.5,
+            max_sparsity=0.95,
+        )
+
+        self.assertEqual(signals["conv1"], 0.9)
+        self.assertLess(targets["conv1.weight"], targets["fc1.weight"])
+        self.assertNotIn("fc2.weight", targets)
+        self.assertAlmostEqual(total_target_sparsity(masks, targets), 0.8, places=2)
+
+    def test_drift_signal_keeps_low_cka_layer_denser(self) -> None:
+        masks = equal_size_signal_masks()
+
+        targets, signals = cka_signal_to_layer_sparsities(
+            masks=masks,
+            cka_scores={"conv1": 0.9, "conv2": 0.6, "fc1": 0.3},
+            base_sparsity=0.8,
+            signal="drift",
+            strength=1.0,
+            min_sparsity=0.5,
+            max_sparsity=0.95,
+        )
+
+        self.assertAlmostEqual(signals["conv1"], 0.1)
+        self.assertAlmostEqual(signals["fc1"], 0.7)
+        self.assertLess(targets["fc1.weight"], targets["conv1.weight"])
+        self.assertNotIn("fc2.weight", targets)
+        self.assertAlmostEqual(total_target_sparsity(masks, targets), 0.8, places=2)
+
+    def test_invalid_cka_signal_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            cka_scores_to_signal_scores({"conv1": 0.9}, signal="distance")
+
     def test_linear_cka_is_finite_and_bounded(self) -> None:
         torch.manual_seed(0)
         score = linear_cka(torch.randn(12, 8), torch.randn(12, 8))
@@ -154,6 +198,29 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
         self.assertEqual(config["sparsity"], 0.9)
         self.assertEqual(config["num_clients"], 5)
         self.assertEqual(config["method"], "cka_feddst")
+        self.assertEqual(config["cka_signal"], "similarity")
+
+    def test_cka_signal_cli_override_takes_precedence(self) -> None:
+        parser = build_train_parser()
+        args = parser.parse_args(
+            [
+                "--config",
+                "configs/cka_feddst_mnist.yaml",
+                "--cka-signal",
+                "drift",
+            ]
+        )
+
+        config = load_final_config(args)
+
+        self.assertEqual(DEFAULT_CONFIG["cka_signal"], "similarity")
+        self.assertEqual(config["cka_signal"], "drift")
+
+    def test_invalid_cka_signal_cli_value_is_rejected(self) -> None:
+        parser = build_train_parser()
+
+        with self.assertRaises(SystemExit):
+            parser.parse_args(["--cka-signal", "distance"])
 
     def test_fashion_mnist_config_keeps_method_files_reusable(self) -> None:
         parser = build_train_parser()
@@ -285,6 +352,33 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
                 Path("configs/global_cifar10.yaml"),
             )
 
+    def test_experiment_runner_passes_cka_signal_to_cka_feddst_only(self) -> None:
+        parser = build_runner_parser()
+        args = parser.parse_args(
+            [
+                "--dataset",
+                "cifar10",
+                "--suite",
+                "sparsity",
+                "--methods",
+                "sparse_fedavg",
+                "cka_feddst",
+                "--cka-signal",
+                "drift",
+                "--sparsities",
+                "0.8",
+                "--dry_run",
+            ]
+        )
+
+        specs = build_run_specs(args, "test_suite")
+        commands = {spec.method: build_command(spec) for spec in specs}
+
+        self.assertNotIn("--cka-signal", commands["sparse_fedavg"])
+        self.assertIn("--cka-signal", commands["cka_feddst"])
+        signal_index = commands["cka_feddst"].index("--cka-signal") + 1
+        self.assertEqual(commands["cka_feddst"][signal_index], "drift")
+
     def test_aggregation_and_average_plotting_use_summary_csvs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -323,6 +417,32 @@ class ResearchPipelineSmokeTests(unittest.TestCase):
             plots = generate_plots_from_averages(avg_dir, plot_dir)
             self.assertTrue(plots)
             self.assertTrue((plot_dir / "accuracy_vs_rounds_mean_std.png").exists())
+
+
+def equal_size_signal_masks() -> dict[str, torch.Tensor]:
+    """Return equal-sized fake masks for signal-allocation tests."""
+
+    return {
+        "conv1.weight": torch.ones(100),
+        "conv2.weight": torch.ones(100),
+        "fc1.weight": torch.ones(100),
+        "fc2.weight": torch.ones(100),
+    }
+
+
+def total_target_sparsity(
+    masks: dict[str, torch.Tensor],
+    targets: dict[str, float],
+) -> float:
+    """Compute aggregate sparsity for layers with adaptive targets."""
+
+    total_params = sum(masks[name].numel() for name in targets)
+    active_params = sum(
+        round(masks[name].numel() * (1.0 - sparsity))
+        for name, sparsity in targets.items()
+    )
+    return 1.0 - (active_params / total_params)
+
 
 def write_training_log(path: Path, method: str, seed: int, accuracies) -> None:
     """Write a tiny two-round training log for aggregation tests."""
